@@ -2,7 +2,6 @@
 
 > Generate structured, professional PDFs from dynamic templates with auto Table of Contents, clean pagination, and a unified A4 renderer—powered by a minimal FastAPI backend and a lightweight, framework‑free frontend.
 
----9
 
 ## 📘 Overview
 
