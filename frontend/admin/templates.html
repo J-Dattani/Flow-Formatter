@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+</html>
+    <!-- Form Link Generation Modal -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Management - Smart Document Merger</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="../css/components/dashboard.css" rel="stylesheet">
+    <link href="../css/components/templates.css" rel="stylesheet">
+    <link href="../css/components/utilities.css" rel="stylesheet">
+</head>
+<body class="dashboard-container">
+    <!-- Sidebar -->
+    <div id="sidebar-placeholder"></div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navigation -->
+        <div class="mt-3 mb-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                
+                <h4 class="mb-0 fw-semibold text-gray-800">Template Management</h4>
+            </div>
+            
+            <div class="d-flex align-items-center">
+        
+                
+                <!-- User Profile -->
+                    <div class="dropdown">
+                        <button class="btn btn-link d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                            <span id="adminName"></span>
+                            <div class="admin-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                A
+                            </div>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="headerLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+            </div>
+        </div>
+
+        <!-- Template Management Content -->
+        <div class="container-fluid">
+            <!-- Filter Bar -->
+            <div class="template-filter-bar">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="position-relative">
+                            <i class="fas fa-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
+                            <input type="text" class="form-control template-search ps-5" placeholder="Search templates..." id="templateSearch">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="filter-tags">
+                            <span class="filter-tag active" data-filter="all">All</span>
+                            <span class="filter-tag" data-filter="active">Active</span>
+                            <span class="filter-tag" data-filter="draft">Draft</span>
+                            <span class="filter-tag" data-filter="document">Document</span>
+                            <span class="filter-tag" data-filter="report">Report</span>
+                            <span class="filter-tag" data-filter="research">Research</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Grid -->
+            <div class="row" id="templatesGrid">
+                <!-- Create New Template Card -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="template-card create-template-card" data-bs-toggle="modal" data-bs-target="#templateSelectionModal" style="cursor: pointer;">
+                        <div class="create-template-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Create New Template</h5>
+                        <p class="mb-0 opacity-75">Start building a new document template</p>
+                    </div>
+                </div>
+
+                <!-- Template Cards -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="template-card" data-template-id="1">
+                        <div class="template-status status-active">Active</div>
+                        <div class="template-icon document">
+                            <i class="fas fa-file-text"></i>
+                        </div>
+                        <h5 class="fw-semibold mb-2">Annual Report 2024</h5>
+                        <p class="text-muted mb-3">Comprehensive annual business report template with financial sections</p>
+                        
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>12 Authors</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>Created: Oct 1, 2024</span>
+                            </div>
+                        </div>
+                        
+                        <div class="template-actions mt-3">
+                            <a href="template-editor-advanced.html?id=1" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="duplicateTemplate(1)">
+                                <i class="fas fa-copy me-1"></i>Duplicate
+                            </button
+                            <button class="btn btn-sm btn-outline-success" onclick="generateFormLink(1, 'Annual Report 2024')">
+                                <i class="fas fa-link me-1"></i>Form Link
+                            </button>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="viewSubmissions(1)">View Submissions</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportTemplate(1)">Export Template</a></li>
+                                    <li><a class="dropdown-item" href="../form.html?template=1&name=Annual%20Report%202024" target="_blank">Preview Form</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="archiveTemplate(1)">Archive</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="template-card" data-template-id="2">
+                        <div class="template-status status-active">Active</div>
+                        <div class="template-icon report">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h5 class="fw-semibold mb-2">Research Paper Template</h5>
+                        <p class="text-muted mb-3">Academic research paper with abstract, methodology, and results sections</p>
+                        
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>8 Authors</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>Created: Sep 15, 2024</span>
+                            </div>
+                        </div>
+                        
+                        <div class="template-actions mt-3">
+                            <a href="template-editor-advanced.html?id=2" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="duplicateTemplate(2)">
+                                <i class="fas fa-copy me-1"></i>Duplicate
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="generateFormLink(2, 'Research Paper Template')">
+                                <i class="fas fa-link me-1"></i>Form Link
+                            </button>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="viewSubmissions(2)">View Submissions</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportTemplate(2)">Export Template</a></li>
+                                    <li><a class="dropdown-item" href="../form.html?template=2&name=Research%20Paper%20Template" target="_blank">Preview Form</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="archiveTemplate(2)">Archive</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="template-card" data-template-id="3">
+                        <div class="template-status status-draft">Draft</div>
+                        <div class="template-icon research">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <h5 class="fw-semibold mb-2">Project Proposal</h5>
+                        <p class="text-muted mb-3">Business project proposal template with budget and timeline sections</p>
+                        
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>0 Authors</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>Created: Oct 5, 2024</span>
+                            </div>
+                        </div>
+                        
+                        <div class="template-actions mt-3">
+                            <button class="btn btn-sm btn-primary" onclick="editTemplate(3)">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="duplicateTemplate(3)">
+                                <i class="fas fa-copy me-1"></i>Duplicate
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" disabled>
+                                <i class="fas fa-link me-1"></i>Link
+                            </button>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="publishTemplate(3)">Publish Template</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportTemplate(3)">Export Template</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteTemplate(3)">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Selection Modal -->
+    <div class="modal fade" id="templateSelectionModal" tabindex="-1" aria-labelledby="templateSelectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="templateSelectionModalLabel">
+                        <i class="fas fa-file-alt me-2"></i>Choose Template Type
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <!-- Blank Template -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="template-option" onclick="selectTemplate('blank')">
+                                <div class="template-thumbnail">
+                                    <div class="blank-template-preview">
+                                        <i class="fas fa-file-alt fa-3x text-muted"></i>
+                                        <div class="preview-lines">
+                                            <div class="line"></div>
+                                            <div class="line short"></div>
+                                            <div class="line"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h6 class="mt-3 fw-bold">Blank Template</h6>
+                                <p class="text-muted small">Start with a clean canvas</p>
+                            </div>
+                        </div>
+
+                        <!-- Research Paper Template -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="template-option" onclick="selectTemplate('research-paper')">
+                                <div class="template-thumbnail">
+                                    <div class="research-template-preview">
+                                        <div class="preview-header">Research Paper</div>
+                                        <div class="preview-columns">
+                                            <div class="column">
+                                                <div class="line"></div>
+                                                <div class="line short"></div>
+                                                <div class="line"></div>
+                                            </div>
+                                            <div class="column">
+                                                <div class="line"></div>
+                                                <div class="line short"></div>
+                                                <div class="line"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h6 class="mt-3 fw-bold">Research Paper (IEEE)</h6>
+                                <p class="text-muted small">Two-column academic layout</p>
+                            </div>
+                        </div>
+
+                        <!-- Resume Template -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="template-option" onclick="selectTemplate('resume-cv')">
+                                <div class="template-thumbnail">
+                                    <div class="resume-template-preview">
+                                        <div class="preview-header-gradient"></div>
+                                        <div class="preview-content">
+                                            <div class="line"></div>
+                                            <div class="line short"></div>
+                                            <div class="line"></div>
+                                            <div class="line medium"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h6 class="mt-3 fw-bold">Resume / CV</h6>
+                                <p class="text-muted small">Professional placement template</p>
+                            </div>
+                        </div>
+
+                        <!-- Academic Chapter Template -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="template-option" onclick="selectTemplate('academic-chapter')">
+                                <div class="template-thumbnail">
+                                    <div class="chapter-template-preview">
+                                        <div class="preview-title">Chapter Title</div>
+                                        <div class="preview-content">
+                                            <div class="line"></div>
+                                            <div class="line"></div>
+                                            <div class="line short"></div>
+                                            <div class="preview-image"></div>
+                                            <div class="line"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h6 class="mt-3 fw-bold">Academic Chapter</h6>
+                                <p class="text-muted small">Faculty submission format</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .template-option {
+        text-align: center;
+        padding: 20px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .template-option:hover {
+        border-color: #6C63FF;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(108, 99, 255, 0.15);
+    }
+
+    .template-thumbnail {
+        width: 100px;
+        height: 130px;
+        margin: 0 auto 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .blank-template-preview {
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .preview-lines {
+        margin-top: 10px;
+    }
+
+    .line {
+        height: 2px;
+        background: #dee2e6;
+        margin: 4px 0;
+        border-radius: 1px;
+    }
+
+    .line.short {
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .line.medium {
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .research-template-preview {
+        width: 100%;
+        height: 100%;
+        padding: 8px;
+    }
+
+    .preview-header {
+        font-size: 8px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .preview-columns {
+        display: flex;
+        gap: 4px;
+        height: 80px;
+    }
+
+    .column {
+        flex: 1;
+        padding: 4px;
+    }
+
+    .column .line {
+        height: 1px;
+        margin: 2px 0;
+    }
+
+    .resume-template-preview {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .preview-header-gradient {
+        height: 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px 4px 0 0;
+    }
+
+    .preview-content {
+        padding: 8px;
+        height: calc(100% - 25px);
+    }
+
+    .chapter-template-preview {
+        width: 100%;
+        height: 100%;
+        padding: 8px;
+    }
+
+    .preview-title {
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+        padding: 4px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .preview-image {
+        height: 20px;
+        background: #e9ecef;
+        border-radius: 4px;
+        margin: 6px 0;
+    }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- [ADDED]: Supabase client for templates data wiring -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <!-- html2pdf for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPy2pqF2mYk6lQ5l8n4C4gHqSxYxG8kJ4x8Jj6sQ6nq4p7X2D3u8gYtltbWb4Xc9fWQx1Xzq3a8w5ZQ2H0g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Shared preview renderer used by Edit and Export (parity with preview) -->
+    <script src="../js/preview-renderer.js"></script>
+    <script src="../js/templates.js"></script>
+</body>
+</html>

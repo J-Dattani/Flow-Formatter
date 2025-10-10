@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Smart Document Merger</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="../css/components/dashboard.css" rel="stylesheet">
+    <link href="../css/components/utilities.css" rel="stylesheet">
+</head>
+        
+<body class="dashboard-container">
+    <!-- Sidebar -->
+    <div id="sidebar-placeholder"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-link d-lg-none" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0 fw-bold">Settings</h4>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-primary" onclick="saveAllSettings()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                            <div class="avatar me-2">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" id="logoutBtn2">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="row">
+                <!-- Settings Navigation -->
+                <div class="col-md-3">
+                    <div class="card shadow-sm" style="border-radius: 1rem;">
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <a href="#general" class="list-group-item list-group-item-action active" onclick="showSettingsSection('general', this)">
+                                    <i class="fas fa-cog me-2"></i>General
+                                </a>
+                                <a href="#profile" class="list-group-item list-group-item-action" onclick="showSettingsSection('profile', this)">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a>
+                                <a href="#templates" class="list-group-item list-group-item-action" onclick="showSettingsSection('templates', this)">
+                                    <i class="fas fa-file-alt me-2"></i>Templates
+                                </a>
+                                <a href="#notifications" class="list-group-item list-group-item-action" onclick="showSettingsSection('notifications', this)">
+                                    <i class="fas fa-bell me-2"></i>Notifications
+                                </a>
+                                <a href="#security" class="list-group-item list-group-item-action" onclick="showSettingsSection('security', this)">
+                                    <i class="fas fa-shield-alt me-2"></i>Security
+                                </a>
+                                <a href="#integrations" class="list-group-item list-group-item-action" onclick="showSettingsSection('integrations', this)">
+                                    <i class="fas fa-plug me-2"></i>Integrations
+                                </a>
+                                <a href="#backup" class="list-group-item list-group-item-action" onclick="showSettingsSection('backup', this)">
+                                    <i class="fas fa-database me-2"></i>Backup & Data
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="col-md-9">
+                    <!-- General Settings -->
+                    <div id="general-settings" class="settings-section">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">General Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="generalForm">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="systemName" class="form-label">System Name</label>
+                                            <input type="text" class="form-control" id="systemName" value="Smart Document Merger">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="systemLanguage" class="form-label">Default Language</label>
+                                            <select class="form-select" id="systemLanguage">
+                                                <option value="en">English</option>
+                                                <option value="es">Spanish</option>
+                                                <option value="fr">French</option>
+                                                <option value="de">German</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="timezone" class="form-label">Timezone</label>
+                                            <select class="form-select" id="timezone">
+                                                <option value="UTC">UTC</option>
+                                                <option value="EST">Eastern Standard Time</option>
+                                                <option value="PST">Pacific Standard Time</option>
+                                                <option value="GMT">Greenwich Mean Time</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="dateFormat" class="form-label">Date Format</label>
+                                            <select class="form-select" id="dateFormat">
+                                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Feature Settings</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="autoSave" checked>
+                                                    <label class="form-check-label" for="autoSave">
+                                                        Auto-save templates
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                                    <label class="form-check-label" for="emailNotifications">
+                                                        Email notifications
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="publicTemplates">
+                                                    <label class="form-check-label" for="publicTemplates">
+                                                        Allow public templates
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="analyticsTracking" checked>
+                                                    <label class="form-check-label" for="analyticsTracking">
+                                                        Analytics tracking
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Settings -->
+                    <div id="profile-settings" class="settings-section" style="display: none;">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">Profile Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="profileForm">
+                                    <div class="row mb-4">
+                                        <div class="col-md-4 text-center">
+                                            <div class="avatar-xl mb-3" style="width: 120px; height: 120px; background: linear-gradient(135deg, #6C63FF, #7B8CFF); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                                <i class="fas fa-user text-white" style="font-size: 3rem;"></i>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-camera me-1"></i>Change Photo
+                                            </button>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="firstName" class="form-label">First Name</label>
+                                                    <input type="text" class="form-control" id="firstName" value="Admin">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="lastName" class="form-label">Last Name</label>
+                                                    <input type="text" class="form-control" id="lastName" value="User">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email Address</label>
+                                                <input type="email" class="form-control" id="email" value="admin@example.com">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" placeholder="+1 (555) 123-4567">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="department" class="form-label">Department</label>
+                                                <input type="text" class="form-control" id="department" value="Administration">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label for="bio" class="form-label">Bio</label>
+                                        <textarea class="form-control" id="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template Settings -->
+                    <div id="templates-settings" class="settings-section" style="display: none;">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">Template Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="templatesForm">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="defaultTemplate" class="form-label">Default Template</label>
+                                            <select class="form-select" id="defaultTemplate">
+                                                <option value="">No default template</option>
+                                                <option value="basic">Basic Document</option>
+                                                <option value="report">Business Report</option>
+                                                <option value="proposal">Project Proposal</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="maxFileSize" class="form-label">Max File Size (MB)</label>
+                                            <input type="number" class="form-control" id="maxFileSize" value="10" min="1" max="100">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="allowedFormats" class="form-label">Allowed File Formats</label>
+                                            <div class="mt-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="formatPDF" checked>
+                                                    <label class="form-check-label" for="formatPDF">PDF</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="formatDOCX" checked>
+                                                    <label class="form-check-label" for="formatDOCX">DOCX</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="formatHTML">
+                                                    <label class="form-check-label" for="formatHTML">HTML</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="templateExpiry" class="form-label">Template Expiry (Days)</label>
+                                            <input type="number" class="form-control" id="templateExpiry" value="365" min="1">
+                                            <div class="form-text">Templates will be archived after this many days of inactivity</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Template Features</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="versionControl" checked>
+                                                    <label class="form-check-label" for="versionControl">
+                                                        Version control
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="templateSharing" checked>
+                                                    <label class="form-check-label" for="templateSharing">
+                                                        Template sharing
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                                                    <label class="form-check-label" for="autoBackup">
+                                                        Auto backup templates
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="templateComments">
+                                                    <label class="form-check-label" for="templateComments">
+                                                        Allow template comments
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div id="notifications-settings" class="settings-section" style="display: none;">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">Notification Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="notificationsForm">
+                                    <div class="mb-4">
+                                        <h6>Email Notifications</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="newSubmission" checked>
+                                                    <label class="form-check-label" for="newSubmission">
+                                                        New submissions
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="statusChanges" checked>
+                                                    <label class="form-check-label" for="statusChanges">
+                                                        Status changes
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="newUsers">
+                                                    <label class="form-check-label" for="newUsers">
+                                                        New user registrations
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="systemAlerts" checked>
+                                                    <label class="form-check-label" for="systemAlerts">
+                                                        System alerts
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="weeklyReports">
+                                                    <label class="form-check-label" for="weeklyReports">
+                                                        Weekly reports
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="marketingEmails">
+                                                    <label class="form-check-label" for="marketingEmails">
+                                                        Marketing emails
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6>Browser Notifications</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="browserNotifications" checked>
+                                            <label class="form-check-label" for="browserNotifications">
+                                                Enable browser notifications
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="soundNotifications">
+                                            <label class="form-check-label" for="soundNotifications">
+                                                Sound notifications
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="notificationFrequency" class="form-label">Notification Frequency</label>
+                                        <select class="form-select" id="notificationFrequency">
+                                            <option value="instant">Instant</option>
+                                            <option value="hourly">Hourly digest</option>
+                                            <option value="daily">Daily digest</option>
+                                            <option value="weekly">Weekly digest</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div id="security-settings" class="settings-section" style="display: none;">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">Security Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="securityForm">
+                                    <div class="mb-4">
+                                        <h6>Password Settings</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="currentPassword" class="form-label">Current Password</label>
+                                                <input type="password" class="form-control" id="currentPassword">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="newPassword" class="form-label">New Password</label>
+                                                <input type="password" class="form-control" id="newPassword">
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                                <input type="password" class="form-control" id="confirmPassword">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6>Two-Factor Authentication</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="enable2FA">
+                                            <label class="form-check-label" for="enable2FA">
+                                                Enable Two-Factor Authentication
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-qrcode me-1"></i>Setup 2FA
+                                        </button>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6>Session Management</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                                <input type="number" class="form-control" id="sessionTimeout" value="30" min="5" max="480">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mt-4">
+                                                    <input class="form-check-input" type="checkbox" id="rememberDevice">
+                                                    <label class="form-check-label" for="rememberDevice">
+                                                        Remember this device
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6>Login Security</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="loginAlerts" checked>
+                                            <label class="form-check-label" for="loginAlerts">
+                                                Email alerts for new logins
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="suspiciousActivity" checked>
+                                            <label class="form-check-label" for="suspiciousActivity">
+                                                Monitor suspicious activity
+                                            </label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integration Settings -->
+                    <div id="integrations-settings" class="settings-section" style="display: none;">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">Integrations</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="integration-card p-4 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fab fa-google fa-2x text-danger me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Google Drive</h6>
+                                                        <small class="text-muted">Cloud storage integration</small>
+                                                    </div>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="googleDrive">
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm">Configure</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-4">
+                                        <div class="integration-card p-4 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fab fa-dropbox fa-2x text-primary me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Dropbox</h6>
+                                                        <small class="text-muted">File synchronization</small>
+                                                    </div>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="dropbox">
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm">Configure</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        <div class="integration-card p-4 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fab fa-slack fa-2x text-success me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Slack</h6>
+                                                        <small class="text-muted">Team notifications</small>
+                                                    </div>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="slack" checked>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm">Configure</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        <div class="integration-card p-4 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fab fa-microsoft fa-2x text-info me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Microsoft 365</h6>
+                                                        <small class="text-muted">Office integration</small>
+                                                    </div>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="microsoft365">
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm">Configure</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backup Settings -->
+                    <div id="backup-settings" class="settings-section" style="display: none;">
+                        <div class="card shadow-sm" style="border-radius: 1rem;">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 fw-bold">Backup & Data Management</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6>Automatic Backups</h6>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="autoBackups" checked>
+                                        <label class="form-check-label" for="autoBackups">
+                                            Enable automatic backups
+                                        </label>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="backupFrequency" class="form-label">Backup Frequency</label>
+                                            <select class="form-select" id="backupFrequency">
+                                                <option value="daily">Daily</option>
+                                                <option value="weekly" selected>Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="backupRetention" class="form-label">Retention Period (Days)</label>
+                                            <input type="number" class="form-control" id="backupRetention" value="30" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h6>Manual Backup</h6>
+                                    <p class="text-muted">Create a backup of all your data right now.</p>
+                                    <button class="btn btn-primary" onclick="createBackup()">
+                                        <i class="fas fa-download me-2"></i>Create Backup
+                                    </button>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h6>Data Export</h6>
+                                    <p class="text-muted">Export your data in various formats.</p>
+                                    <div class="btn-group">
+                                        <button class="btn btn-outline-primary" onclick="exportData('json')">Export as JSON</button>
+                                        <button class="btn btn-outline-primary" onclick="exportData('csv')">Export as CSV</button>
+                                        <button class="btn btn-outline-primary" onclick="exportData('xml')">Export as XML</button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h6>Data Import</h6>
+                                    <p class="text-muted">Import data from external sources.</p>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="importFile" accept=".json,.csv,.xml">
+                                        <button class="btn btn-outline-primary" onclick="importData()">Import Data</button>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="mb-4">
+                                    <h6 class="text-danger">Danger Zone</h6>
+                                    <p class="text-muted">These actions cannot be undone.</p>
+                                    <button class="btn btn-outline-danger" onclick="resetAllSettings()">
+                                        <i class="fas fa-undo me-2"></i>Reset All Settings
+                                    </button>
+                                    <button class="btn btn-danger ms-2" onclick="deleteAllData()">
+                                        <i class="fas fa-trash me-2"></i>Delete All Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <script src="../js/settings.js"></script>
+</body>
+</html>

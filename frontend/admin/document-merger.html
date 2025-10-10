@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Merger - FormatFlow</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="../css/components/dashboard.css" rel="stylesheet">
+    <link href="../css/components/utilities.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #6C63FF;
+            --primary-gradient: linear-gradient(90deg, #6C63FF, #7B8CFF);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            
+            /* Light mode colors */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #404040;
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(108, 99, 255, 0.2);
+        }
+
+        .main-container {
+            min-height: calc(100vh - 80px);
+            padding: 2rem 0;
+        }
+
+        .upload-zone {
+            border: 3px dashed #6C63FF;
+            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.05), rgba(123, 140, 255, 0.05));
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #5a52d5;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(123, 140, 255, 0.1));
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .file-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            cursor: move;
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .file-item.processing {
+            opacity: 0.7;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .file-icon.pdf { background: #dc3545; }
+        .file-icon.docx { background: #2b579a; }
+        .file-icon.txt { background: #6c757d; }
+        .file-icon.odt { background: #0066cc; }
+        .file-icon.md { background: #000; }
+        .file-icon.default { background: #6c757d; }
+
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            background: #e9ecef;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .merge-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .template-card {
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover, .template-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .preview-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            min-height: 400px;
+        }
+
+        .export-buttons {
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .stats-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #6c757d;
+            padding: 0.5rem;
+        }
+
+        .drag-handle:hover {
+            color: var(--primary-color);
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+
+        .sortable-chosen {
+            transform: rotate(5deg);
+        }
+
+        .processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            z-index: 10;
+        }
+
+        /* Document Thumbnails */
+        .file-thumbnail {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .file-thumbnail-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Progress Indicators */
+        .enhanced-progress {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            height: 8px;
+        }
+
+        .enhanced-progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enhanced-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Merge Presets */
+        .preset-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .preset-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .preset-card.active {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.1);
+        }
+
+        /* Keyboard Shortcuts Help */
+        .shortcuts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .shortcuts-panel {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--card-shadow);
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .shortcut-key {
+            background: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-layer-group me-2"></i>
+                        Document Merger
+                    </h1>
+                    <p class="mb-0 opacity-75">Merge multiple documents into one professional format</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button class="btn btn-outline-light btn-sm me-2" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                        <i class="fas fa-moon" id="darkModeIcon"></i>
+                    </button>
+                    <button class="btn btn-light btn-sm me-2" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="showHelp()">
+                        <i class="fas fa-question-circle me-1"></i> Help
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            <!-- Stats Row -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="totalFiles">0</div>
+                        <div class="text-muted">Files Uploaded</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="totalPages">0</div>
+                        <div class="text-muted">Total Pages</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="totalSize">0</div>
+                        <div class="text-muted">Total Size (MB)</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number text-success" id="mergeStatus">Ready</div>
+                        <div class="text-muted">Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Upload Section -->
+                <div class="col-lg-8">
+                    <!-- Upload Zone -->
+                    <div class="upload-zone" id="uploadZone">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h4 class="mb-3">Drop Documents Here</h4>
+                        <p class="text-muted mb-3">
+                            Or click to browse and select multiple files
+                        </p>
+                        <div class="mb-3">
+                            <span class="badge bg-primary me-2">DOCX</span>
+                            <span class="badge bg-primary me-2">PDF</span>
+                            <span class="badge bg-primary me-2">TXT</span>
+                            <span class="badge bg-primary me-2">ODT</span>
+                            <span class="badge bg-primary me-2">Markdown</span>
+                        </div>
+                        <p class="small text-muted">Maximum file size: 50MB per file</p>
+                        <input type="file" id="fileInput" multiple accept=".docx,.pdf,.txt,.odt,.md,.doc" style="display: none;">
+                    </div>
+
+                    <!-- Files List -->
+                    <div class="mt-4" id="filesSection" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Uploaded Documents
+                            </h5>
+                            <div>
+                                <button class="btn btn-outline-secondary btn-sm me-2" onclick="clearAllFiles()">
+                                    <i class="fas fa-trash me-1"></i> Clear All
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="addMoreFiles()">
+                                    <i class="fas fa-plus me-1"></i> Add More
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tip:</strong> Drag and drop files to reorder them. The merge will follow this sequence.
+                        </div>
+
+                        <div id="filesList" class="sortable-list">
+                            <!-- Files will be added here dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Merge Configuration -->
+                    <div class="merge-section" id="mergeSection" style="display: none;">
+                        <h5 class="mb-4">
+                            <i class="fas fa-cogs me-2"></i>
+                            Merge Configuration
+                        </h5>
+
+                        <!-- Template Selection -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Choose Master Template</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="template-card" data-template="professional" onclick="selectTemplate('professional')">
+                                        <i class="fas fa-briefcase text-primary mb-2" style="font-size: 2rem;"></i>
+                                        <h6>Professional</h6>
+                                        <small class="text-muted">Business documents</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="template-card" data-template="academic" onclick="selectTemplate('academic')">
+                                        <i class="fas fa-graduation-cap text-success mb-2" style="font-size: 2rem;"></i>
+                                        <h6>Academic</h6>
+                                        <small class="text-muted">Research papers</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="template-card" data-template="book" onclick="selectTemplate('book')">
+                                        <i class="fas fa-book text-warning mb-2" style="font-size: 2rem;"></i>
+                                        <h6>Book Format</h6>
+                                        <small class="text-muted">Publication ready</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Options -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Formatting Options</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="preserveHeaders" checked>
+                                    <label class="form-check-label" for="preserveHeaders">
+                                        Preserve original headers
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="addPageBreaks" checked>
+                                    <label class="form-check-label" for="addPageBreaks">
+                                        Add page breaks between documents
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="consistentFonts" checked>
+                                    <label class="form-check-label" for="consistentFonts">
+                                        Apply consistent fonts
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="autoNumbering">
+                                    <label class="form-check-label" for="autoNumbering">
+                                        Auto-number sections
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Output Settings</h6>
+                                <div class="mb-3">
+                                    <label for="documentTitle" class="form-label">Document Title</label>
+                                    <input type="text" class="form-control" id="documentTitle" placeholder="Enter merged document title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="pageSize" class="form-label">Page Size</label>
+                                    <select class="form-select" id="pageSize">
+                                        <option value="a4">A4 (210 × 297 mm)</option>
+                                        <option value="letter">Letter (8.5 × 11 in)</option>
+                                        <option value="legal">Legal (8.5 × 14 in)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary btn-lg me-3" onclick="startMerge()" id="mergeBtn">
+                                <i class="fas fa-layer-group me-2"></i>
+                                Merge Documents
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="resetMerger()">
+                                <i class="fas fa-redo me-2"></i>
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div class="preview-section" id="previewSection" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">
+                                <i class="fas fa-eye me-2"></i>
+                                Document Preview
+                            </h5>
+                            <div class="export-buttons d-flex">
+                                <button class="btn btn-success me-2" onclick="exportDocument('pdf')">
+                                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                                </button>
+                                <button class="btn btn-primary me-2" onclick="exportDocument('docx')">
+                                    <i class="fas fa-file-word me-1"></i> Export DOCX
+                                </button>
+                                <button class="btn btn-warning" onclick="exportDocument('epub')">
+                                    <i class="fas fa-book me-1"></i> Export EPUB
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="preview-container bg-light p-4 rounded" id="previewContainer">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-file-alt" style="font-size: 3rem; opacity: 0.3;"></i>
+                                <p class="mt-3">Merged document preview will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Progress Panel -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tasks me-2"></i>
+                                Processing Status
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="processingSteps">
+                                <div class="step-item" id="step1">
+                                    <i class="fas fa-upload text-muted"></i>
+                                    <span>Upload Documents</span>
+                                    <i class="fas fa-check text-success float-end" style="display: none;"></i>
+                                </div>
+                                <div class="step-item" id="step2">
+                                    <i class="fas fa-cog text-muted"></i>
+                                    <span>Configure Merge</span>
+                                    <i class="fas fa-check text-success float-end" style="display: none;"></i>
+                                </div>
+                                <div class="step-item" id="step3">
+                                    <i class="fas fa-layer-group text-muted"></i>
+                                    <span>Merge Documents</span>
+                                    <i class="fas fa-check text-success float-end" style="display: none;"></i>
+                                </div>
+                                <div class="step-item" id="step4">
+                                    <i class="fas fa-download text-muted"></i>
+                                    <span>Export & Download</span>
+                                    <i class="fas fa-check text-success float-end" style="display: none;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Panel -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Tips & Guidelines
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="tip-item mb-3">
+                                <i class="fas fa-info-circle text-primary me-2"></i>
+                                <small>Drag files to reorder the merge sequence</small>
+                            </div>
+                            <div class="tip-item mb-3">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <small>Large files may take longer to process</small>
+                            </div>
+                            <div class="tip-item mb-3">
+                                <i class="fas fa-star text-success me-2"></i>
+                                <small>Use consistent formatting for better results</small>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-shield-alt text-info me-2"></i>
+                                <small>Your documents are processed securely</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Merge Presets Panel -->
+                    <div class="card mt-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-bookmark me-2"></i>
+                                Merge Presets
+                            </h6>
+                            <button class="btn btn-sm btn-outline-primary" onclick="saveCurrentPreset()">
+                                <i class="fas fa-save me-1"></i> Save
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="presetsContainer">
+                                <!-- Presets will be loaded here -->
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary w-100 mt-2" onclick="showPresetModal()">
+                                <i class="fas fa-plus me-1"></i> Create New Preset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Keyboard Shortcuts -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-keyboard me-2"></i>
+                                Keyboard Shortcuts
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-sm btn-outline-info w-100" onclick="showKeyboardShortcuts()">
+                                <i class="fas fa-question-circle me-1"></i> View Shortcuts
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Help Modal -->
+    <div class="modal fade" id="keyboardShortcutsModal" tabindex="-1" aria-labelledby="keyboardShortcutsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="keyboardShortcutsModalLabel">
+                        <i class="fas fa-keyboard me-2"></i>Keyboard Shortcuts
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">File Operations</h6>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Open File Dialog</span>
+                                <kbd>Ctrl + O</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Remove Selected</span>
+                                <kbd>Delete</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Clear All Files</span>
+                                <kbd>Ctrl + Shift + X</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-3">
+                                <span>Select All Files</span>
+                                <kbd>Ctrl + A</kbd>
+                            </div>
+
+                            <h6 class="fw-bold mb-3">Merge Operations</h6>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Start Merge</span>
+                                <kbd>Ctrl + M</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Download Result</span>
+                                <kbd>Ctrl + S</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Preview Result</span>
+                                <kbd>Ctrl + P</kbd>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Navigation</h6>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Toggle Dark Mode</span>
+                                <kbd>Ctrl + D</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Show Help</span>
+                                <kbd>F1</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Focus File Input</span>
+                                <kbd>Ctrl + I</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-3">
+                                <span>Close Modal</span>
+                                <kbd>Escape</kbd>
+                            </div>
+
+                            <h6 class="fw-bold mb-3">File List</h6>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Move Up</span>
+                                <kbd>Ctrl + ↑</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Move Down</span>
+                                <kbd>Ctrl + ↓</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Select Next</span>
+                                <kbd>↓</kbd>
+                            </div>
+                            <div class="shortcut-item d-flex justify-content-between mb-2">
+                                <span>Select Previous</span>
+                                <kbd>↑</kbd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preset Save Modal -->
+    <div class="modal fade" id="presetModal" tabindex="-1" aria-labelledby="presetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="presetModalLabel">Save Merge Preset</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="presetName" class="form-label">Preset Name</label>
+                        <input type="text" class="form-control" id="presetName" placeholder="Enter preset name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="presetDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="presetDescription" rows="2" placeholder="Describe this preset configuration"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmSavePreset()">Save Preset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Modal -->
+    <div class="modal fade" id="processingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="mb-2">Processing Documents</h5>
+                    <p class="text-muted mb-3" id="processingText">Merging your documents...</p>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%" id="processingProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="../js/document-merger.js"></script>
+</body>
+</html>

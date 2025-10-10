@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Template Editor - Smart Document Merger</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="../css/components/dashboard.css" rel="stylesheet">
+    <link href="../css/components/utilities.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #6C63FF;
+            --primary-gradient: linear-gradient(90deg, #6C63FF, #7B8CFF);
+        }
+        
+        .template-editor-container {
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .left-sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            padding-bottom: 2rem; /* Add bottom padding for scroll space */
+        }
+        
+        .center-editor {
+            background: #ffffff;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            position: relative;
+            padding-bottom: 2rem; /* Add bottom padding for scroll space */
+        }
+        
+        .right-sidebar {
+            background: #ffffff;
+            border-left: 1px solid #e9ecef;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            padding-bottom: 2rem; /* Add bottom padding for scroll space */
+        }
+        
+        .document-preview {
+            background: #ffffff;
+            margin: 20px;
+            padding: 40px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            min-height: calc(100vh - 40px);
+            position: relative;
+        }
+        
+        .floating-toolbar {
+            position: sticky;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 12px 20px;
+            z-index: 100;
+            max-width: 95%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        .contextual-toolbar {
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 8px 15px;
+            z-index: 200;
+            display: none;
+            border: 2px solid var(--primary-color);
+        }
+
+        .content-block.editing {
+            position: relative;
+        }
+
+        .content-block.editing .contextual-toolbar {
+            display: block;
+        }
+        
+        .document-preview {
+            padding-top: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* New Rich Editor Styles */
+        .document-editor {
+            background: #ffffff;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .editor-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .editor-toolbar .btn {
+            border: none;
+            margin: 0 2px;
+        }
+
+        .editor-toolbar .btn:hover {
+            background: rgba(108, 99, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .editor-toolbar .btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .editor-area {
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+            padding: 24px;
+            background: white;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .editor-area:focus {
+            outline: none;
+        }
+
+        .editor-area h1, .editor-area h2, .editor-area h3, .editor-area h4 {
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .editor-area p {
+            margin-bottom: 12px;
+        }
+
+        .editor-area blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 16px;
+            margin: 16px 0;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .content-block {
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .content-block:hover {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.05);
+        }
+        
+        .content-block.selected {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+        
+        .block-controls {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .content-block:hover .block-controls,
+        .content-block.selected .block-controls {
+            opacity: 1;
+        }
+        
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+        
+        .sortable-chosen {
+            background: rgba(108, 99, 255, 0.1);
+        }
+        
+        .chapter-card {
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .chapter-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chapter-card.active {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.05);
+        }
+        
+        .block-palette .btn {
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .block-palette .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .property-section {
+            border-radius: 1rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 1rem;
+            padding: 40px 20px;
+            text-align: center;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            min-height: 100px;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.05);
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 1rem 1rem 0 0;
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* File Upload Styles */
+        .file-upload-area {
+            position: relative;
+        }
+        
+        .upload-box {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+        }
+        
+        .upload-box:hover {
+            border-color: var(--primary-color) !important;
+            background: linear-gradient(135deg, #f0f2ff 0%, #e8ebff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+        }
+        
+        .upload-box.dragover {
+            border-color: var(--primary-color) !important;
+            background: linear-gradient(135deg, #e8ebff 0%, #dde2ff 100%);
+            transform: scale(1.02);
+        }
+        
+        .files-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .file-item:hover {
+            border-color: var(--primary-color);
+            background: #f8f9ff;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        
+        .file-icon {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+        
+        .file-size {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .file-progress {
+            width: 100%;
+            height: 3px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .file-progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive and Collapsible Sidebar Styles */
+        .sidebar-collapsed {
+            width: 50px !important;
+            min-width: 50px !important;
+            transition: all 0.3s ease;
+            overflow: visible;
+            position: relative;
+        }
+
+        .sidebar-collapsed .sidebar-content {
+            opacity: 0;
+            transform: translateX(-100%);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-content {
+            opacity: 1;
+            transform: translateX(0);
+            transition: all 0.3s ease;
+            pointer-events: all;
+        }
+
+        /* Toggle buttons when collapsed */
+        .sidebar-collapsed::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f9fa;
+            z-index: 1;
+        }
+
+        .left-sidebar.sidebar-collapsed::after {
+            border-right: 1px solid #e9ecef;
+        }
+
+        .right-sidebar.sidebar-collapsed::after {
+            border-left: 1px solid #e9ecef;
+            background: #ffffff;
+        }
+
+        .sidebar-collapsed .collapsed-toggle {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            background: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-collapsed .collapsed-toggle:hover {
+            background: #5a52e3;
+            border-color: #5a52e3;
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .collapsed-toggle {
+            display: none;
+        }
+
+        .sidebar-collapsed .collapsed-toggle {
+            display: flex;
+        }
+
+        /* Default center editor with smooth transitions */
+        .center-editor {
+            transition: all 0.3s ease;
+        }
+
+        /* Enhanced Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .left-sidebar, .right-sidebar {
+                position: fixed;
+                top: 70px;
+                height: calc(100vh - 70px);
+                z-index: 1050;
+                background: white;
+                box-shadow: 0 0 20px rgba(0,0,0,0.3);
+                width: 320px !important;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .right-sidebar {
+                right: 0;
+                transform: translateX(100%);
+            }
+
+            .sidebar-open {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-collapsed {
+                width: 0 !important;
+                min-width: 0 !important;
+                transform: translateX(-100%);
+            }
+
+            .right-sidebar.sidebar-collapsed {
+                transform: translateX(100%);
+            }
+
+            .center-editor {
+                width: 100% !important;
+                flex: none;
+            }
+        }
+
+        /* Enhanced Template Block Styles */
+        .template-block {
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            background: white;
+        }
+
+        .template-block:hover {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .template-block.selected {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        .template-block[contenteditable="true"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .block-controls {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .template-block:hover .block-controls,
+        .template-block.selected .block-controls {
+            opacity: 1;
+        }
+
+        /* File Upload Enhancements */
+        .file-item {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .file-item.uploading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-color);
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .file-item.uploading .upload-progress {
+            transform: scaleX(1);
+        }
+
+        /* Toolbar Active States */
+        .editor-toolbar .btn.active {
+            background-color: var(--primary-color, #6C63FF) !important;
+            border-color: var(--primary-color, #6C63FF) !important;
+            color: white !important;
+        }
+
+        .editor-toolbar .btn-outline-secondary.active {
+            background-color: #6C63FF;
+            border-color: #6C63FF;
+            color: white;
+        }
+
+        .editor-toolbar .form-select.active {
+            border-color: #6C63FF;
+            box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+        }
+
+        .editor-toolbar .form-control.active {
+            border-color: #6C63FF;
+            box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+        }
+
+        /* Button group active states */
+        .btn-group .btn.active {
+            z-index: 1;
+        }
+
+        /* Color picker active state */
+        .form-control-color.active {
+            border: 3px solid #6C63FF;
+        }
+    </style>
+</head>
+
+<body class="template-editor-container">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-light bg-white shadow-sm px-3 d-flex justify-content-between" style="height: 70px;">
+        <div class="d-flex align-items-center">
+            <div class="brand-logo me-3" style="width: 40px; height: 40px;">
+                <i class="fas fa-file-contract text-primary" style="font-size: 18px;"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold">Smart Document Merger</h5>
+                <small class="text-muted">Advanced Template Editor</small>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <!-- Auto-save indicator -->
+            <div id="saveIndicator" class="text-muted small" style="display: none;">
+                <i class="fas fa-clock me-1"></i>Auto-saving...
+            </div>
+            
+            <button class="btn btn-outline-secondary" onclick="templateEditor.saveTemplate()">
+                <i class="fas fa-save me-2"></i>Save Draft
+            </button>
+            <button class="btn btn-outline-info" onclick="templateEditor.previewTemplate()">
+                <i class="fas fa-eye me-2"></i>Preview
+            </button>
+            <button class="btn btn-success" onclick="templateEditor.publishTemplate()">
+                <i class="fas fa-paper-plane me-2"></i>Publish
+            </button>
+            <button class="btn btn-secondary" onclick="templateEditor.closeEditor()">
+                <i class="fas fa-times me-2"></i>Close
+            </button>
+            
+            <!-- Profile Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-link dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                    <div class="avatar me-2">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+                    <li><a class="dropdown-item" href="templates.html">Templates</a></li>
+                    <li><a class="dropdown-item" href="template-editor-advanced.html">Template Editor</a></li>
+                    <li><a class="dropdown-item" href="projects.html">Projects</a></li>
+                    <li><a class="dropdown-item" href="authors.html">Authors</a></li>
+                    <li><a class="dropdown-item" href="submissions.html">Submissions</a></li>
+                    <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" onclick="AuthSystem.logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Editor Layout -->
+    <div class="d-flex" style="height: calc(100vh - 70px); max-height: calc(100vh - 70px);" id="mainLayout">
+    <!-- Left Sidebar - Template Structure & Chapters (Chapters disabled) -->
+    <div class="left-sidebar" id="leftSidebar" style="width: 300px; min-width: 300px; flex-shrink: 0;">
+            <!-- Collapsed Toggle Button -->
+            <button class="collapsed-toggle" onclick="toggleSidebar('left')" id="leftCollapsedToggle" title="Expand Sidebar">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="sidebar-content">
+                <div class="p-3" style="padding-bottom: 3rem !important;">
+                    <!-- Sidebar Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3" id="docStructureHeader" style="display:none;">
+                        <h6 class="mb-0 fw-bold">Document Structure</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleSidebar('left')" id="leftToggle" title="Toggle Sidebar">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="chaptersContainer" style="display:none;"></div>
+                
+                <!-- Template Metadata -->
+                <div class="mt-4">
+                    <h6 class="fw-bold mb-3">Template Info</h6>
+                    <div class="mb-3">
+                        <label for="templateName" class="form-label">Template Name</label>
+                        <input type="text" class="form-control" id="templateName" placeholder="Enter template name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="templateDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="templateDescription" rows="3" placeholder="Template description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="templateCategory" class="form-label">Category</label>
+                        <select class="form-select" id="templateCategory">
+                            <option value="">Select Category</option>
+                            <option value="business">Business Report</option>
+                            <option value="proposal">Project Proposal</option>
+                            <option value="contract">Contract</option>
+                            <option value="invoice">Invoice</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- File Upload Section -->
+                <div class="mt-4">
+                    <h6 class="fw-bold mb-3">File Manager</h6>
+                    
+                    <!-- Upload Area -->
+                    <div class="file-upload-area mb-3" id="fileUploadArea">
+                        <div class="upload-box text-center p-3 border-2 border-dashed border-primary rounded">
+                            <i class="fas fa-cloud-upload-alt text-primary mb-2" style="font-size: 2rem;"></i>
+                            <p class="mb-2"><strong>Drop files here or click to browse</strong></p>
+                            <p class="small text-muted">Supports: PDF, DOC, DOCX, TXT, Images</p>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif" class="d-none">
+                        </div>
+                    </div>
+                    
+                    <!-- Uploaded Files List -->
+                    <div class="uploaded-files">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Uploaded Files</small>
+                            <button class="btn btn-sm btn-outline-danger" onclick="templateEditor.clearAllFiles()" id="clearFilesBtn" style="display: none;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <div id="filesList" class="files-list">
+                            <!-- Uploaded files will appear here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Integration Options -->
+                    <div class="mt-3">
+                        <h6 class="small fw-bold text-muted">INTEGRATION OPTIONS</h6>
+                        <div class="btn-group-vertical w-100" role="group">
+                            <button class="btn btn-sm btn-outline-info" onclick="templateEditor.extractTextFromFiles()">
+                                <i class="fas fa-file-text me-2"></i>Extract Text
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="templateEditor.insertAsImages()">
+                                <i class="fas fa-image me-2"></i>Insert as Images
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="templateEditor.createTemplateFromFile()">
+                                <i class="fas fa-magic me-2"></i>Auto-Generate Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Center Editor - Template Canvas -->
+        <div class="center-editor bg-white border-start border-end" id="centerEditor" style="flex: 1; min-width: 0;">
+            <!-- Rich Text Editor Toolbar -->
+            <div class="editor-toolbar bg-light border-bottom p-2 d-flex flex-wrap align-items-center sticky-top">
+                <!-- Sidebar Toggle for Mobile -->
+                <button class="btn btn-sm btn-outline-secondary me-2 d-md-none" onclick="toggleSidebar('left')">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <!-- History Controls -->
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="templateEditor.undoAction()" title="Undo">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="templateEditor.redoAction()" title="Redo">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+
+                <div class="vr mx-2"></div>
+
+                <!-- Text Style Dropdown -->
+                <select class="form-select form-select-sm w-auto me-2" onchange="formatBlock(this.value)">
+                    <option value="">Normal Text</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="h4">Heading 4</option>
+                    <option value="blockquote">Quote</option>
+                </select>
+
+                <!-- Font Family Dropdown -->
+                <select class="form-select form-select-sm w-auto me-2" onchange="changeFontFamily(this.value)">
+                    <option value="Inter">Inter</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Poppins">Poppins</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Arial">Arial</option>
+                </select>
+
+                <!-- Font Size Input -->
+                <input type="number" class="form-control form-control-sm w-auto me-2" value="16" min="10" max="48" style="width: 70px;" onchange="changeFontSize(this.value)">
+
+                <div class="vr mx-2"></div>
+
+                <!-- Text Formatting -->
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('bold')" title="Bold">
+                    <i class="bi bi-type-bold"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('italic')" title="Italic">
+                    <i class="bi bi-type-italic"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('underline')" title="Underline">
+                    <i class="bi bi-type-underline"></i>
+                </button>
+
+                <!-- Text Color -->
+                <input type="color" class="form-control form-control-color form-control-sm me-2" title="Choose text color" onchange="changeTextColor(this.value)">
+
+                <!-- Code -->
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('code')" title="Code">
+                    <i class="bi bi-code"></i>
+                </button>
+
+                <div class="vr mx-2"></div>
+
+                <!-- Quick Headings -->
+                <div class="btn-group me-2">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="formatBlock('h1')" title="Heading 1">H1</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="formatBlock('h2')" title="Heading 2">H2</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="formatBlock('h3')" title="Heading 3">H3</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="formatBlock('h4')" title="Heading 4">H4</button>
+                </div>
+
+                <!-- Lists -->
+                <div class="btn-group me-2">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="insertList('bullet')" title="Bullet List">
+                        <i class="bi bi-list-ul"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="insertList('numbered')" title="Numbered List">
+                        <i class="bi bi-list-ol"></i>
+                    </button>
+                </div>
+
+                <!-- Link -->
+                <button class="btn btn-sm btn-outline-secondary me-2" onclick="insertLink()" title="Insert Link">
+                    <i class="bi bi-link-45deg"></i>
+                </button>
+
+                <div class="vr mx-2"></div>
+
+                <!-- Text Alignment -->
+                <div class="btn-group me-2">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="alignText('left')" title="Align Left">
+                        <i class="bi bi-text-left"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="alignText('center')" title="Center">
+                        <i class="bi bi-text-center"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="alignText('right')" title="Align Right">
+                        <i class="bi bi-text-right"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="alignText('justify')" title="Justify">
+                        <i class="bi bi-justify"></i>
+                    </button>
+                </div>
+
+                <div class="vr mx-2"></div>
+
+                <!-- Integration Ready Buttons -->
+                <button class="btn btn-sm btn-success me-1" onclick="templateEditor.saveTemplate()" title="Save Template">
+                    <i class="bi bi-floppy"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-info me-1" onclick="templateEditor.previewTemplate()" title="Preview">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="templateEditor.exportTemplate()" title="Export">
+                    <i class="bi bi-download"></i>
+                </button>
+            </div>
+
+            <!-- Template Canvas Area -->
+            <div class="canvas-area p-3" style="min-height: calc(100vh - 200px); padding-bottom: 3rem;">
+                <div id="templateCanvas" class="template-canvas sortable-blocks" style="min-height: calc(100vh - 250px);">
+                    <!-- Template blocks will be added here -->
+                    <div class="empty-canvas text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Start Building Your Template</h5>
+                        <p class="text-muted">Drag blocks from the sidebar or use the rich text toolbar above</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Block Controls & Author Fields -->
+        <div class="right-sidebar" id="rightSidebar" style="width: 300px; min-width: 300px; flex-shrink: 0;">
+            <!-- Collapsed Toggle Button -->
+            <button class="collapsed-toggle" onclick="toggleSidebar('right')" id="rightCollapsedToggle" title="Expand Sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="sidebar-content">
+                <div class="p-3" style="padding-bottom: 3rem !important;">
+                    <!-- Sidebar Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Sidebar Toggle Button -->
+                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleSidebar('right')" id="rightToggle" title="Toggle Sidebar">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <h6 class="mb-0 fw-bold">Content Tools</h6>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="rightSidebarTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="content-tab" data-bs-toggle="tab" data-bs-target="#content-panel" type="button" role="tab">
+                                Content
+                            </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="authors-tab" data-bs-toggle="tab" data-bs-target="#authors-panel" type="button" role="tab">
+                            Authors
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="variables-tab" data-bs-toggle="tab" data-bs-target="#variables-panel" type="button" role="tab">
+                            Variables
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="rightSidebarTabContent">
+                    <!-- Content Tab -->
+                    <div class="tab-pane fade show active" id="content-panel" role="tabpanel">
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Content Blocks</h6>
+                            <div class="block-palette">
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('title')">
+                                    <i class="fas fa-heading me-2"></i>Title Block
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('subtitle')">
+                                    <i class="fas fa-text-height me-2"></i>Subtitle
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('paragraph')">
+                                    <i class="fas fa-paragraph me-2"></i>Text Block
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('image')">
+                                    <i class="fas fa-image me-2"></i>Image
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('quote')">
+                                    <i class="fas fa-quote-left me-2"></i>Quote
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('table')">
+                                    <i class="fas fa-table me-2"></i>Table
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('divider')">
+                                    <i class="fas fa-minus me-2"></i>Divider
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('pagebreak')">
+                                    <i class="fas fa-file-export me-2"></i>Page Break
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Fillable Fields</h6>
+                            <div class="block-palette">
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('textfield')">
+                                    <i class="fas fa-edit me-2"></i>Text Field
+                                </button>
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('textarea')">
+                                    <i class="fas fa-align-left me-2"></i>Text Area
+                                </button>
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('signature')">
+                                    <i class="fas fa-signature me-2"></i>Signature
+                                </button>
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('checkbox')">
+                                    <i class="fas fa-check-square me-2"></i>Checkbox
+                                </button>
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('dropdown')">
+                                    <i class="fas fa-caret-down me-2"></i>Dropdown
+                                </button>
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="templateEditor.addContentBlock('attachment')">
+                                    <i class="fas fa-paperclip me-2"></i>Attachment
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Properties Panel -->
+                        <div id="propertiesPanel" style="display: none;">
+                            <h6 class="fw-bold mb-3">Properties</h6>
+                            <div class="property-section p-3 mb-3">
+                                <div id="propertyContent">
+                                    <!-- Dynamic property controls will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Authors Tab -->
+                    <div class="tab-pane fade" id="authors-panel" role="tabpanel">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">Assigned Authors</h6>
+                                <button class="btn btn-outline-primary btn-sm" onclick="addAuthor()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div id="authorsContainer">
+                                <!-- Authors will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Variables Tab -->
+                    <div class="tab-pane fade" id="variables-panel" role="tabpanel">
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Template Variables</h6>
+                            <div class="block-palette">
+                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="insertVariable('author_name')">
+                                    <i class="fas fa-user me-2"></i>{Author Name}
+                                </button>
+                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="insertVariable('date')">
+                                    <i class="fas fa-calendar me-2"></i>{Date}
+                                </button>
+                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="insertVariable('chapter_title')">
+                                    <i class="fas fa-bookmark me-2"></i>{Chapter Title}
+                                </button>
+                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="insertVariable('page_number')">
+                                    <i class="fas fa-hashtag me-2"></i>{Page Number}
+                                </button>
+                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="insertVariable('document_title')">
+                                    <i class="fas fa-file-alt me-2"></i>{Document Title}
+                                </button>
+                            </div>
+
+                            <div class="mt-4">
+                                <h6 class="fw-bold mb-3">Custom Variables</h6>
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" id="customVariableName" placeholder="Variable name">
+                                    <button class="btn btn-outline-primary" onclick="templateEditor.addCustomVariable()">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="customVariablesContainer">
+                                    <!-- Custom variables will be listed here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Author Modal -->
+    <div class="modal fade" id="addAuthorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Author to Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAuthorForm">
+                        <div class="mb-3">
+                            <label for="authorSelect" class="form-label">Select Author</label>
+                            <select class="form-select" id="authorSelect" required>
+                                <option value="">Choose an author...</option>
+                                <!-- Authors will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="authorRole" class="form-label">Role in Document</label>
+                            <select class="form-select" id="authorRole" required>
+                                <option value="">Select role...</option>
+                                <option value="primary">Primary Author</option>
+                                <option value="contributor">Contributor</option>
+                                <option value="reviewer">Reviewer</option>
+                                <option value="approver">Approver</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="authorSections" class="form-label">Assigned Sections</label>
+                            <div id="sectionCheckboxes">
+                                <!-- Section checkboxes will be populated dynamically -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmAddAuthor()">Add Author</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Publish Modal -->
+    <div class="modal fade" id="publishModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Publish Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Once published, this template will be available for all users to create documents.
+                    </div>
+                    <form id="publishForm">
+                        <div class="mb-3">
+                            <label for="publishTitle" class="form-label">Template Title</label>
+                            <input type="text" class="form-control" id="publishTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publishDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="publishDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publishCategory" class="form-label">Category</label>
+                            <select class="form-select" id="publishCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="business">Business Report</option>
+                                <option value="proposal">Project Proposal</option>
+                                <option value="contract">Contract</option>
+                                <option value="invoice">Invoice</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="publishFeatured">
+                                <label class="form-check-label" for="publishFeatured">
+                                    Featured Template
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmPublish()">Publish Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Template Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="previewContent">
+                    <!-- Preview content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="exportTemplate()">Export HTML</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- Supabase client (for auth + data) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <script src="../js/advanced-template-editor.js"></script>
+</body>
+</html>
