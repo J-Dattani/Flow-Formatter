@@ -95,7 +95,7 @@ uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 Health check: http://localhost:8000/health → `{ "status": "ok" }`
 
-### 3) Frontend (static)
+### 3) Frontend
 
 Option A: VS Code “Live Server”
 - Open `frontend/` → Right‑click `admin/templates.html` → “Open with Live Server”
