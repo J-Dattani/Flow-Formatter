@@ -1,19 +1,4 @@
-<div align="center">
-
-	<img src="frontend/assets/LOGO.png" alt="Flow-Formatter Logo" width="140" />
-
-	<h1><strong>Flow-Formatter</strong></h1>
-	<p>Smart, structured document templating and A4‑perfect PDF generation</p>
-
-	<p>
-		<a href="https://github.com/J-Dattani/Flow-Formatter"><img alt="Repo" src="https://img.shields.io/badge/repo-J--Dattani%2FFlow--Formatter-24292f?logo=github"></a>
-		<img alt="Language: JS" src="https://img.shields.io/badge/language-JavaScript-yellow?logo=javascript">
-		<img alt="Language: Python" src="https://img.shields.io/badge/language-Python-blue?logo=python">
-		<img alt="Backend: FastAPI" src="https://img.shields.io/badge/backend-FastAPI-009688?logo=fastapi">
-		<img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg">
-	</p>
-
-</div>
+![Flow-Formatter Logo](frontend/assets/LOGO.png)
 
 > Generate structured, professional PDFs from dynamic templates with auto Table of Contents, clean pagination, and a unified A4 renderer—powered by a minimal FastAPI backend and a lightweight, framework‑free frontend.
 
