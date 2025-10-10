@@ -166,9 +166,11 @@ async function handleLogout(e) {
         // Clear auth token and user data
         clearAuthToken();
         window.currentUser = null;
-        
-        // Redirect to login page
-        window.location.href = 'index.html';
+
+        // Redirect target: admin pages go to the public user login, others go to local index
+        const ADMIN_LOGOUT_REDIRECT = 'http://127.0.0.1:3000/user/index.html';
+        const isAdmin = (window.location.pathname || '').includes('/admin/');
+        window.location.href = isAdmin ? ADMIN_LOGOUT_REDIRECT : 'index.html';
     }
 }
 

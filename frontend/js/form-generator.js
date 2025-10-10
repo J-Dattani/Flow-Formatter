@@ -707,7 +707,7 @@ class FormGenerator {
                 name: this.templateData.name,
                 metadata: { editor: { content: displayBlocks } }
             };
-            const container = window.PreviewRenderer.buildContainer(tmpTemplate, { includeTitle: true });
+            const container = window.PreviewRenderer.buildContainer(tmpTemplate, { includeTitle: false });
             preview.appendChild(container);
         } else {
             // Fallback to legacy per-element rendering if PreviewRenderer missing
@@ -835,15 +835,30 @@ class FormGenerator {
     downloadDocument(isPreview = false) {
         const container = document.getElementById('documentPreview');
         if (!container) return this.showNotification('Nothing to download yet.', 'warning');
+        const target = container.querySelector('.preview-document') || container;
         const filename = `${(this.templateData?.name || 'document').replace(/\s+/g,'_')}.pdf`;
         if (!window.html2pdf) return this.showNotification('PDF library not loaded.', 'danger');
+        // Prepare DOM for better pagination (avoid orphan headings)
+        if (window.PreviewRenderer && typeof window.PreviewRenderer.prepareForPdf === 'function') {
+            try { window.PreviewRenderer.prepareForPdf(target); } catch (_) {}
+        }
+        // Clone into a visible off-screen host to avoid hidden modal issues
+        const host = document.createElement('div');
+        host.style.cssText = 'position:fixed;left:-99999px;top:0;width:820px;z-index:-1;visibility:visible;';
+        const clone = target.cloneNode(true);
+        host.appendChild(clone);
+        document.body.appendChild(host);
+
         window.html2pdf().set({
             margin: [10,10,10,10],
             filename,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(container).save();
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['css', 'legacy'] }
+        }).from(clone).save().finally(() => {
+            if (host && host.parentNode) host.parentNode.removeChild(host);
+        });
     }
 
     saveProgress() {

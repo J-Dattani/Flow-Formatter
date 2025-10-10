@@ -176,15 +176,17 @@ class AdminLayout {
                 // Show logout message
                 this.showNotification('Logged out successfully', 'success');
                 
-                // Redirect after short delay
+                // Redirect after short delay (admin pages go to specified user login)
+                const ADMIN_LOGOUT_REDIRECT = 'http://127.0.0.1:3000/user/index.html';
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = ADMIN_LOGOUT_REDIRECT;
                 }, 1000);
             }
         } catch (error) {
             console.error('Logout error:', error);
             // Force logout even if there's an error
-            window.location.href = 'index.html';
+            const ADMIN_LOGOUT_REDIRECT = 'http://127.0.0.1:3000/user/index.html';
+            window.location.href = ADMIN_LOGOUT_REDIRECT;
         }
     }
 

@@ -86,34 +86,37 @@
             margin-bottom: 2rem;
         }
         
-        .preview-document {
+        .form-preview-document {
             background: white;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 3rem;
-            margin: 2rem auto;
-            max-width: 800px;
+            padding: 2rem;
+            margin: 1.5rem auto;
+            max-width: 820px;
             font-family: 'Inter', sans-serif;
+            word-break: normal;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
         
-        .preview-title {
+        .form-preview-document .preview-title {
             font-size: 2rem;
             font-weight: 700;
             text-align: center;
             margin-bottom: 2rem;
         }
         
-        .preview-subtitle {
+        .form-preview-document .preview-subtitle {
             font-size: 1.25rem;
             font-weight: 600;
             margin: 1.5rem 0 1rem 0;
         }
         
-        .preview-paragraph {
+        .form-preview-document .preview-paragraph {
             line-height: 1.6;
             margin-bottom: 1rem;
         }
         
-        .preview-quote {
+        .form-preview-document .preview-quote {
             font-style: italic;
             padding: 1rem;
             background: #f8f9fa;
@@ -121,7 +124,7 @@
             margin: 1.5rem 0;
         }
         
-        .preview-image {
+        .form-preview-document .preview-image {
             max-width: 100%;
             height: auto;
             display: block;
@@ -129,7 +132,7 @@
             border-radius: 8px;
         }
         
-        .preview-divider {
+        .form-preview-document .preview-divider {
             border: none;
             height: 2px;
             background: #dee2e6;
@@ -201,7 +204,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="documentPreview" class="preview-document">
+                    <div id="documentPreview" class="form-preview-document">
                         <!-- Preview content will be generated here -->
                     </div>
                 </div>

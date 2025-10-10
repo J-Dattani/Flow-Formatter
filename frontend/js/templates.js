@@ -507,8 +507,8 @@ async function exportTemplate(id) {
         await ensurePreviewRenderer();
 
         // Build a hidden container using shared PreviewRenderer
-        const container = window.PreviewRenderer.buildContainer(tpl, { includeTitle: false });
-        const host = document.createElement('div');
+    const container = window.PreviewRenderer.buildContainer(tpl, { includeTitle: false });
+    const host = document.createElement('div');
         host.style.position = 'fixed';
         host.style.left = '-99999px';
         host.style.top = '0';
@@ -529,19 +529,25 @@ async function exportTemplate(id) {
         }
         await ensureHtml2Pdf();
 
-        const filename = `${(tpl.name || 'template').toString().replace(/\s+/g, '_')}_${id}.pdf`;
+    const filename = `${(tpl.name || 'template').toString().replace(/\s+/g, '_')}_${id}.pdf`;
+    const target = container.querySelector('.preview-document') || container;
 
         // Use html2pdf to export the container to PDF
         try {
+            // Prepare DOM for better pagination (avoid orphan headings)
+            if (window.PreviewRenderer && typeof window.PreviewRenderer.prepareForPdf === 'function') {
+                try { window.PreviewRenderer.prepareForPdf(target); } catch (_) {}
+            }
             await window.html2pdf()
                 .set({
                     margin: [10, 10, 10, 10],
                     filename,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true, logging: false },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
                 })
-                .from(container)
+                .from(target)
                 .save();
             showAlert('PDF exported successfully.', 'success');
         } catch (pdfErr) {

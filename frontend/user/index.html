@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormatFlow - Smart Document Merging Platform</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="css/landing.css" rel="stylesheet">
+    
+    <!-- Meta Tags - Enhanced SEO -->
+    <meta name="description" content="FormatFlow - AI-powered document merging platform. Transform your workflow with intelligent merging, automated formatting, and seamless collaboration. Try free today!">
+    <meta name="keywords" content="document merger, smart formatting, workflow automation, document management, AI merging, PDF merger, document collaboration, business productivity">
+    <meta name="author" content="FormatFlow">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    <meta name="distribution" content="global">
+    <meta name="rating" content="general">
+    
+    <!-- Structured Data for Rich Snippets -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "FormatFlow",
+        "description": "AI-powered document merging platform for smart formatting and workflow automation",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "2547",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "FormatFlow",
+            "url": "https://formatflow.com"
+        }
+    }
+    </script>
+    
+    <!-- Open Graph Enhanced -->
+    <meta property="og:title" content="FormatFlow - AI-Powered Document Merging Platform">
+    <meta property="og:description" content="Transform your document workflow with intelligent merging, automated formatting, and seamless collaboration. Trusted by 10,000+ teams worldwide.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://formatflow.com">
+    <meta property="og:image" content="https://formatflow.com/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="FormatFlow">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@formatflow">
+    <meta name="twitter:creator" content="@formatflow">
+    <meta name="twitter:title" content="FormatFlow - AI-Powered Document Merging">
+    <meta name="twitter:description" content="Transform your document workflow with intelligent merging and automated formatting. Try free today!">
+    <meta name="twitter:image" content="https://formatflow.com/images/twitter-card.jpg">
+    
+    <!-- Additional SEO -->
+    <link rel="canonical" href="https://formatflow.com">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="msapplication-TileColor" content="#8B5CF6">
+    
+    <!-- Performance and Accessibility -->
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FormatFlow">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="../css/variables.css" as="style">
+    <link rel="preload" href="css/landing.css" as="style">
+</head>
+<body class="landing-page">
+    <!-- Page Loading Overlay -->
+    <div class="page-loading" id="pageLoading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Skip Navigation Link -->
+    <a href="#main-content" class="skip-link sr-only-focusable">Skip to main content</a>
+
+    <!-- Bubble Background Animation -->
+    <div class="bubble-background">
+        <div class="bubble small"></div>
+        <div class="bubble medium"></div>
+        <div class="bubble large"></div>
+        <div class="bubble small"></div>
+        <div class="bubble extra-large"></div>
+        <div class="bubble medium"></div>
+        <div class="bubble small"></div>
+        <div class="bubble large"></div>
+        <div class="bubble medium"></div>
+        <div class="bubble small"></div>
+        <div class="bubble large"></div>
+        <div class="bubble small"></div>
+        <div class="bubble medium"></div>
+        <div class="bubble extra-large"></div>
+        <div class="bubble small"></div>
+        <div class="bubble medium"></div>
+        <div class="bubble large"></div>
+        <div class="bubble small"></div>
+        <div class="bubble medium"></div>
+        <div class="bubble large"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand" href="#home" aria-label="FormatFlow - Home">
+                <div class="brand-logo">
+                    <i class="fas fa-file-contract" aria-hidden="true"></i>
+                    <span class="brand-text">FormatFlow</span>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" role="menubar">
+                    <li class="nav-item" role="none">
+                        <a class="nav-link" href="#home" role="menuitem">Home</a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a class="nav-link" href="#features" role="menuitem">Features</a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a class="nav-link" href="#how-it-works" role="menuitem">How It Works</a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a class="nav-link" href="#testimonials" role="menuitem">Testimonials</a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a class="nav-link" href="#pricing" role="menuitem">Pricing</a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a class="nav-link" href="#contact" role="menuitem">Contact</a>
+                    </li>
+                    <li class="nav-item ms-3" role="none">
+                        <a class="btn btn-primary nav-cta" href="../admin/index.html" role="menuitem">Get Started</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content" role="main">
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <!-- Animated Background -->
+        <div class="hero-background">
+            <div class="gradient-overlay"></div>
+            <div class="floating-shapes">
+                <div class="floating-shape shape-1"></div>
+                <div class="floating-shape shape-2"></div>
+                <div class="floating-shape shape-3"></div>
+                <div class="floating-shape shape-4"></div>
+                <div class="floating-shape shape-5"></div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <div class="hero-badge" data-aos="fade-up">
+                            <i class="fas fa-sparkles"></i>
+                            <span>AI-Powered Document Intelligence</span>
+                        </div>
+                        
+                        <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
+                            Transform Your 
+                            <span class="gradient-text">Document Workflow</span>
+                            with Smart Merging
+                        </h1>
+                        
+                        <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">
+                            Streamline document creation, merge complex files intelligently, and collaborate seamlessly with our cutting-edge platform designed for modern teams.
+                        </p>
+                        
+                        <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
+                            <a href="../form.html" class="btn btn-primary btn-lg cta-primary">
+                                <i class="fas fa-rocket me-2"></i>
+                                Start Creating
+                                <span class="btn-ripple"></span>
+                            </a>
+                            <a href="#demo" class="btn btn-outline-primary btn-lg cta-secondary">
+                                <i class="fas fa-play me-2"></i>
+                                Watch Demo
+                            </a>
+                        </div>
+                        
+                        <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
+                            <div class="stat-item">
+                                <div class="stat-number">10K+</div>
+                                <div class="stat-label">Documents Processed</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">500+</div>
+                                <div class="stat-label">Happy Teams</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">99.9%</div>
+                                <div class="stat-label">Uptime</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="hero-visual" data-aos="fade-left" data-aos-delay="200">
+                        <div class="mockup-container">
+                            <div class="mockup-window">
+                                <div class="window-header">
+                                    <div class="window-controls">
+                                        <span class="control close"></span>
+                                        <span class="control minimize"></span>
+                                        <span class="control maximize"></span>
+                                    </div>
+                                    <div class="window-title">FormatFlow Dashboard</div>
+                                </div>
+                                <div class="window-content">
+                                    <div class="document-preview">
+                                        <div class="document-item merging" data-delay="1">
+                                            <i class="fas fa-file-alt"></i>
+                                            <span>Report_Draft.docx</span>
+                                            <div class="merge-indicator"></div>
+                                        </div>
+                                        <div class="document-item merging" data-delay="2">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <span>Data_Analysis.pdf</span>
+                                            <div class="merge-indicator"></div>
+                                        </div>
+                                        <div class="document-item merging" data-delay="3">
+                                            <i class="fas fa-file-excel"></i>
+                                            <span>Financial_Data.xlsx</span>
+                                            <div class="merge-indicator"></div>
+                                        </div>
+                                        <div class="merge-arrow">
+                                            <i class="fas fa-arrow-down"></i>
+                                        </div>
+                                        <div class="final-document">
+                                            <i class="fas fa-file-contract"></i>
+                                            <span>Final_Report.pdf</span>
+                                            <div class="success-check">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Floating Elements -->
+                            <div class="floating-element element-1">
+                                <i class="fas fa-magic"></i>
+                                <span>AI Processing</span>
+                            </div>
+                            <div class="floating-element element-2 element-success">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Secure</span>
+                            </div>
+                            <div class="floating-element element-3 element-lime">
+                                <i class="fas fa-bolt"></i>
+                                <span>Fast</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator" data-aos="fade-up" data-aos-delay="500">
+            <a href="#features" class="scroll-to-explore">
+                <div class="scroll-text">Scroll to explore</div>
+                <div class="scroll-arrow">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section id="features" class="features-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <div class="section-header" data-aos="fade-up">
+                        <div class="section-badge">
+                            <i class="fas fa-star"></i>
+                            <span>Powerful Features</span>
+                        </div>
+                        <h2 class="section-title">
+                            Everything You Need for 
+                            <span class="gradient-text">Smart Document</span> 
+                            Management
+                        </h2>
+                        <p class="section-subtitle">
+                            Discover the advanced capabilities that make FormatFlow the ultimate solution for document workflow automation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Feature 1: AI-Powered Merging -->
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card" data-feature="ai-merging">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="feature-content">
+                            <h3 class="feature-title">AI-Powered Merging</h3>
+                            <p class="feature-description">
+                                Intelligent document analysis and seamless merging with advanced AI algorithms.
+                            </p>
+                            <div class="feature-tags">
+                                <span class="tag">Smart Detection</span>
+                                <span class="tag">Auto-Format</span>
+                            </div>
+                        </div>
+                        <div class="feature-hover-effect"></div>
+                    </div>
+                </div>
+                
+                <!-- Feature 2: Template Management -->
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card" data-feature="templates">
+                        <div class="feature-icon">
+                            <i class="fas fa-layer-group"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="feature-content">
+                            <h3 class="feature-title">Advanced Templates</h3>
+                            <p class="feature-description">
+                                Create and customize professional templates with drag-and-drop editor.
+                            </p>
+                            <div class="feature-tags">
+                                <span class="tag">Drag & Drop</span>
+                                <span class="tag">Custom Fields</span>
+                            </div>
+                        </div>
+                        <div class="feature-hover-effect"></div>
+                    </div>
+                </div>
+                
+                <!-- Feature 3: Real-time Collaboration -->
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card" data-feature="collaboration">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="feature-content">
+                            <h3 class="feature-title">Team Collaboration</h3>
+                            <p class="feature-description">
+                                Work together in real-time with live editing and version control.
+                            </p>
+                            <div class="feature-tags">
+                                <span class="tag">Live Editing</span>
+                                <span class="tag">Version Control</span>
+                            </div>
+                        </div>
+                        <div class="feature-hover-effect"></div>
+                    </div>
+                </div>
+                
+                <!-- Feature 4: Security & Compliance -->
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-card" data-feature="security">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <div class="feature-content">
+                            <h3 class="feature-title">Enterprise Security</h3>
+                            <p class="feature-description">
+                                Bank-grade encryption and compliance standards for enterprise peace of mind.
+                            </p>
+                            <div class="feature-tags">
+                                <span class="tag">256-bit Encryption</span>
+                                <span class="tag">SOC 2 Compliant</span>
+                            </div>
+                        </div>
+                        <div class="feature-hover-effect"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features CTA -->
+            <div class="row mt-5">
+                <div class="col-lg-8 mx-auto text-center" data-aos="fade-up" data-aos-delay="500">
+                    <div class="features-cta">
+                        <h3 class="cta-title">Ready to Transform Your Workflow?</h3>
+                        <p class="cta-description">Join thousands of teams already using FormatFlow to streamline their document processes.</p>
+                        <div class="cta-buttons">
+                            <a href="../form.html" class="btn btn-primary btn-lg cta-primary">
+                                <i class="fas fa-rocket me-2"></i>
+                                Get Started Free
+                            </a>
+                            <a href="#pricing" class="btn btn-outline-primary btn-lg cta-secondary">
+                                <i class="fas fa-tags me-2"></i>
+                                View Pricing
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <div class="section-header" data-aos="fade-up">
+                        <div class="section-badge">
+                            <i class="fas fa-cogs"></i>
+                            <span>How It Works</span>
+                        </div>
+                        <h2 class="section-title">
+                            Transform Documents in 
+                            <span class="gradient-text">4 Simple Steps</span>
+                        </h2>
+                        <p class="section-subtitle">
+                            Experience the power of AI-driven document processing with our streamlined workflow designed for efficiency and precision.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Process Timeline -->
+            <div class="process-timeline" data-aos="fade-up" data-aos-delay="200">
+                <div class="timeline-line">
+                    <div class="timeline-progress"></div>
+                </div>
+                
+                <div class="row g-4">
+                    <!-- Step 1: Upload -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="process-step" data-step="upload">
+                            <div class="step-number">
+                                <span>1</span>
+                                <div class="step-glow"></div>
+                            </div>
+                            <div class="step-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="icon-animation upload-animation"></div>
+                            </div>
+                            <div class="step-content">
+                                <h3 class="step-title">Upload Documents</h3>
+                                <p class="step-description">
+                                    Simply drag and drop your documents or select files from your device. Supports multiple formats including PDF, DOCX, and more.
+                                </p>
+                            </div>
+                            <div class="step-visual">
+                                <div class="upload-demo">
+                                    <div class="file-icon">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="upload-arrow">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: AI Analysis -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                        <div class="process-step" data-step="analysis">
+                            <div class="step-number">
+                                <span>2</span>
+                                <div class="step-glow"></div>
+                            </div>
+                            <div class="step-icon">
+                                <i class="fas fa-brain"></i>
+                                <div class="icon-animation analysis-animation"></div>
+                            </div>
+                            <div class="step-content">
+                                <h3 class="step-title">AI Analysis</h3>
+                                <p class="step-description">
+                                    Our advanced AI engine analyzes document structure, content patterns, and formatting to understand merge requirements.
+                                </p>
+                            </div>
+                            <div class="step-visual">
+                                <div class="analysis-demo">
+                                    <div class="brain-waves">
+                                        <div class="wave wave-1"></div>
+                                        <div class="wave wave-2"></div>
+                                        <div class="wave wave-3"></div>
+                                    </div>
+                                    <div class="scanning-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Smart Merge -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                        <div class="process-step" data-step="merge">
+                            <div class="step-number">
+                                <span>3</span>
+                                <div class="step-glow"></div>
+                            </div>
+                            <div class="step-icon">
+                                <i class="fas fa-magic"></i>
+                                <div class="icon-animation merge-animation"></div>
+                            </div>
+                            <div class="step-content">
+                                <h3 class="step-title">Smart Merge</h3>
+                                <p class="step-description">
+                                    Intelligent merging combines documents while preserving formatting, structure, and maintaining professional appearance.
+                                </p>
+                            </div>
+                            <div class="step-visual">
+                                <div class="merge-demo">
+                                    <div class="doc-piece doc-1"></div>
+                                    <div class="doc-piece doc-2"></div>
+                                    <div class="merge-effect">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="merged-doc"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Download -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                        <div class="process-step" data-step="download">
+                            <div class="step-number">
+                                <span>4</span>
+                                <div class="step-glow"></div>
+                            </div>
+                            <div class="step-icon">
+                                <i class="fas fa-download"></i>
+                                <div class="icon-animation download-animation"></div>
+                            </div>
+                            <div class="step-content">
+                                <h3 class="step-title">Download Result</h3>
+                                <p class="step-description">
+                                    Receive your perfectly merged document instantly. Share, print, or save to cloud storage with one click.
+                                </p>
+                            </div>
+                            <div class="step-visual">
+                                <div class="download-demo">
+                                    <div class="completed-file">
+                                        <i class="fas fa-file-check"></i>
+                                    </div>
+                                    <div class="download-arrow">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="success-indicator">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive Demo CTA -->
+            <div class="row mt-5">
+                <div class="col-lg-8 mx-auto text-center" data-aos="fade-up" data-aos-delay="700">
+                    <div class="demo-cta">
+                        <h3 class="demo-title">Ready to See It in Action?</h3>
+                        <p class="demo-description">Experience the seamless document merging process yourself with our interactive demo.</p>
+                        <div class="demo-buttons">
+                            <a href="../form.html" class="btn btn-primary btn-lg cta-primary">
+                                <i class="fas fa-rocket me-2"></i>
+                                Try It Now
+                            </a>
+                            <a href="#features" class="btn btn-outline-primary btn-lg cta-secondary">
+                                <i class="fas fa-play me-2"></i>
+                                Watch Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section py-5" aria-labelledby="testimonials-heading">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="section-header" data-aos="fade-up">
+                        <div class="section-badge">
+                            <i class="fas fa-quote-left me-2" aria-hidden="true"></i>
+                            Success Stories
+                        </div>
+                        <h2 id="testimonials-heading" class="section-title">
+                            Trusted by <span class="highlight-text">10,000+</span> Teams Worldwide
+                        </h2>
+                        <p class="section-subtitle">
+                            See how FormatFlow is transforming document workflows across industries, 
+                            saving teams hours of work while improving collaboration and efficiency.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonials Grid -->
+            <div class="row mt-5" data-aos="fade-up" data-aos-delay="200">
+                <!-- Testimonial 1 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="testimonial-content">
+                            <div class="stars-rating" aria-label="5 star rating">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                            </div>
+                            <blockquote class="testimonial-text">
+                                "FormatFlow reduced our document processing time by 80%. The AI-powered merging is incredibly accurate, and the interface is so intuitive that our entire team adopted it within days."
+                            </blockquote>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="./sarah.png" 
+                                         alt="Sarah Chen, Marketing Director" 
+                                         loading="lazy">
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">Sarah Chen</h4>
+                                    <p class="author-position">Marketing Director</p>
+                                    <p class="author-company">TechFlow Solutions</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-glow"></div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="testimonial-card featured" data-aos="fade-up" data-aos-delay="200">
+                        <div class="featured-badge">
+                            <i class="fas fa-crown" aria-hidden="true"></i>
+                            Featured
+                        </div>
+                        <div class="testimonial-content">
+                            <div class="stars-rating" aria-label="5 star rating">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                            </div>
+                            <blockquote class="testimonial-text">
+                                "Game-changer for our legal practice! FormatFlow handles complex document merging with perfect formatting preservation. It's like having a dedicated document specialist on our team 24/7."
+                            </blockquote>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face&auto=format&q=80" 
+                                         alt="Michael Rodriguez, Senior Partner" 
+                                         loading="lazy">
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">Michael Rodriguez</h4>
+                                    <p class="author-position">Senior Partner</p>
+                                    <p class="author-company">Rodriguez & Associates Law</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-glow"></div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="testimonial-content">
+                            <div class="stars-rating" aria-label="5 star rating">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                            </div>
+                            <blockquote class="testimonial-text">
+                                "The collaboration features are outstanding. Our remote team can merge documents seamlessly, and the version control keeps everything organized. Productivity has skyrocketed!"
+                            </blockquote>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face&auto=format&q=80" 
+                                         alt="Emily Zhang, Project Manager" 
+                                         loading="lazy">
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">Emily Zhang</h4>
+                                    <p class="author-position">Project Manager</p>
+                                    <p class="author-company">Global Consulting Group</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-glow"></div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 4 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="testimonial-content">
+                            <div class="stars-rating" aria-label="4 star rating">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="far fa-star" aria-hidden="true"></i>
+                            </div>
+                            <blockquote class="testimonial-text">
+                                "FormatFlow streamlined our research publication process. Academic papers with multiple contributors are now merged effortlessly with perfect citation formatting."
+                            </blockquote>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face&auto=format&q=80" 
+                                         alt="Dr. James Wilson, Research Director" 
+                                         loading="lazy">
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">Dr. James Wilson</h4>
+                                    <p class="author-position">Research Director</p>
+                                    <p class="author-company">University Research Institute</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-glow"></div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 5 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="500">
+                        <div class="testimonial-content">
+                            <div class="stars-rating" aria-label="5 star rating">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                            </div>
+                            <blockquote class="testimonial-text">
+                                "ROI was immediate. What used to take our team 3 hours now takes 15 minutes. The smart formatting suggestions alone have saved us countless revision cycles."
+                            </blockquote>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face&auto=format&q=80" 
+                                         alt="Lisa Park, Operations Manager" 
+                                         loading="lazy">
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">Lisa Park</h4>
+                                    <p class="author-position">Operations Manager</p>
+                                    <p class="author-company">Innovate Startups</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-glow"></div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 6 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="600">
+                        <div class="testimonial-content">
+                            <div class="stars-rating" aria-label="5 star rating">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                            </div>
+                            <blockquote class="testimonial-text">
+                                "Security and compliance features give us peace of mind. Document merging with enterprise-grade protection - exactly what our financial firm needed."
+                            </blockquote>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face&auto=format&q=80" 
+                                         alt="Robert Kim, IT Director" 
+                                         loading="lazy">
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">Robert Kim</h4>
+                                    <p class="author-position">IT Director</p>
+                                    <p class="author-company">Premier Financial Services</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-glow"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Indicators -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="trust-indicators" data-aos="fade-up" data-aos-delay="300">
+                        <div class="trust-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" data-target="10000">0</div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-target="50000">0</div>
+                                <div class="stat-label">Documents Merged</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-target="99">0</div>
+                                <div class="stat-label">% Uptime</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-target="4.9">0</div>
+                                <div class="stat-label">Star Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing-section" role="region" aria-labelledby="pricing-heading">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 id="pricing-heading" class="section-title" data-aos="fade-up">
+                        Choose Your Perfect Plan
+                    </h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Start free, scale as you grow. All plans include unlimited documents and 24/7 support.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center">
+                <!-- Free Plan -->
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="pricing-card">
+                        <div class="plan-header">
+                            <h3 class="plan-name">Starter</h3>
+                            <p class="plan-description">Perfect for individuals and small teams</p>
+                            <div class="plan-price">
+                                <span class="price-currency">$</span>
+                                <span class="price-amount">0</span>
+                                <span class="price-period">/month</span>
+                            </div>
+                            <p class="price-note">Free forever</p>
+                        </div>
+                        
+                        <div class="plan-features">
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Up to 10 documents/month</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>5 custom templates</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Basic document merging</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Email support</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Standard security</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="plan-cta">
+                            <a href="../form.html" class="btn btn-outline-primary btn-plan">
+                                Get Started Free
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Professional Plan -->
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="pricing-card pricing-card-featured">
+                        <div class="popular-badge">
+                            <span>Most Popular</span>
+                        </div>
+                        <div class="plan-header">
+                            <h3 class="plan-name">Professional</h3>
+                            <p class="plan-description">For growing teams and businesses</p>
+                            <div class="plan-price">
+                                <span class="price-currency">$</span>
+                                <span class="price-amount">29</span>
+                                <span class="price-period">/month</span>
+                            </div>
+                            <p class="price-note">Per user, billed monthly</p>
+                        </div>
+                        
+                        <div class="plan-features">
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Unlimited documents</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Unlimited templates</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>AI-powered merging</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Team collaboration</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Priority support</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Advanced analytics</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>API access</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="plan-cta">
+                            <a href="../form.html" class="btn btn-primary btn-plan">
+                                Start Free Trial
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="pricing-card">
+                        <div class="plan-header">
+                            <h3 class="plan-name">Enterprise</h3>
+                            <p class="plan-description">For large organizations with custom needs</p>
+                            <div class="plan-price">
+                                <span class="price-currency">$</span>
+                                <span class="price-amount">99</span>
+                                <span class="price-period">/month</span>
+                            </div>
+                            <p class="price-note">Per user, custom pricing available</p>
+                        </div>
+                        
+                        <div class="plan-features">
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Everything in Professional</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Custom integrations</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Advanced security & compliance</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Dedicated account manager</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>SLA guarantee</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>On-premise deployment</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                                    <span>Custom training & onboarding</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="plan-cta">
+                            <a href="#contact" class="btn btn-outline-primary btn-plan">
+                                Contact Sales
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pricing FAQ -->
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <div class="pricing-faq" data-aos="fade-up" data-aos-delay="400">
+                        <h3 class="faq-title">Frequently Asked Questions</h3>
+                        <div class="faq-items">
+                            <div class="faq-item">
+                                <h4 class="faq-question">Can I switch plans anytime?</h4>
+                                <p class="faq-answer">Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate the billing accordingly.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4 class="faq-question">Is there a free trial?</h4>
+                                <p class="faq-answer">Absolutely! All paid plans come with a 14-day free trial. No credit card required to start.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4 class="faq-question">What payment methods do you accept?</h4>
+                                <p class="faq-answer">We accept all major credit cards, PayPal, and wire transfers for enterprise customers.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="contact" class="final-cta-section" role="region" aria-labelledby="cta-heading">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="cta-content" data-aos="fade-up">
+                        <h2 id="cta-heading" class="cta-title">
+                            Ready to Transform Your Document Workflow?
+                        </h2>
+                        <p class="cta-subtitle">
+                            Join thousands of teams already using FormatFlow to streamline their document processes. 
+                            Start your free trial today - no credit card required.
+                        </p>
+                        
+                        <div class="cta-stats">
+                            <div class="stat-badge">
+                                <span class="stat-number">10,000+</span>
+                                <span class="stat-label">Active Users</span>
+                            </div>
+                            <div class="stat-badge">
+                                <span class="stat-number">500M+</span>
+                                <span class="stat-label">Documents Processed</span>
+                            </div>
+                            <div class="stat-badge">
+                                <span class="stat-number">99.9%</span>
+                                <span class="stat-label">Uptime</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cta-buttons">
+                            <a href="../form.html" class="btn btn-primary btn-lg cta-primary" data-track="final-cta">
+                                <i class="fas fa-rocket me-2" aria-hidden="true"></i>
+                                Start Free Trial
+                            </a>
+                            <a href="#features" class="btn btn-outline-primary btn-lg cta-secondary">
+                                <i class="fas fa-play me-2" aria-hidden="true"></i>
+                                Watch Demo
+                            </a>
+                        </div>
+                        
+                        <div class="trust-badges">
+                            <div class="badge-item">
+                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                <span>Enterprise Security</span>
+                            </div>
+                            <div class="badge-item">
+                                <i class="fas fa-clock" aria-hidden="true"></i>
+                                <span>24/7 Support</span>
+                            </div>
+                            <div class="badge-item">
+                                <i class="fas fa-credit-card" aria-hidden="true"></i>
+                                <span>No Credit Card Required</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="footer-brand">
+                        <div class="brand-logo">
+                            <i class="fas fa-file-contract" aria-hidden="true"></i>
+                            <span class="brand-text">FormatFlow</span>
+                        </div>
+                        <p class="footer-description">
+                            Streamline your document workflow with intelligent merging, automated formatting, and seamless collaboration.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link" aria-label="Follow us on Twitter">
+                                <i class="fab fa-twitter" aria-hidden="true"></i>
+                            </a>
+                            <a href="#" class="social-link" aria-label="Follow us on LinkedIn">
+                                <i class="fab fa-linkedin" aria-hidden="true"></i>
+                            </a>
+                            <a href="#" class="social-link" aria-label="Follow us on GitHub">
+                                <i class="fab fa-github" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-title">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#security">Security</a></li>
+                        <li><a href="#integrations">Integrations</a></li>
+                        <li><a href="#api">API Docs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-title">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#careers">Careers</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#press">Press</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-title">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#help">Help Center</a></li>
+                        <li><a href="#tutorials">Tutorials</a></li>
+                        <li><a href="#templates">Templates</a></li>
+                        <li><a href="#community">Community</a></li>
+                        <li><a href="#status">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-title">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#cookies">Cookie Policy</a></li>
+                        <li><a href="#gdpr">GDPR</a></li>
+                        <li><a href="#compliance">Compliance</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">
+                            &copy; 2024 FormatFlow. All rights reserved.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-badges">
+                            <img src="https://img.shields.io/badge/SOC2-Compliant-green" alt="SOC2 Compliant" class="compliance-badge">
+                            <img src="https://img.shields.io/badge/GDPR-Compliant-blue" alt="GDPR Compliant" class="compliance-badge">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    </main>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="js/landing.js"></script>
+</body>
+</html>
