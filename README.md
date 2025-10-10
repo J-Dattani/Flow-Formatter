@@ -1,4 +1,4 @@
-![Flow-Formatter Logo](frontend/assets/LOGO_white.jpg)
+![Flow-Formatter Logo](frontend/assets/logo_white.png)
 
 > Generate structured, professional PDFs from dynamic templates with auto Table of Contents, clean pagination, and a unified A4 renderer—powered by a minimal FastAPI backend and a lightweight, framework‑free frontend.
 
