@@ -748,9 +748,7 @@ function templateCardHtml(t) {
                     <a href="template-editor-advanced.html?id=${encodeURIComponent(idStr)}" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit me-1"></i>Edit
                     </a>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="duplicateTemplate(${safeId})">
-                        <i class="fas fa-copy me-1"></i>Duplicate
-                    </button>
+                    <!-- Duplicate button removed -->
                     <button class="btn btn-sm btn-outline-success ${isPublished ? '' : 'disabled'}" ${isPublished ? '' : 'disabled aria-disabled=\"true\"'} onclick="${isPublished ? `generateFormLink(${safeId}, ${nameArg})` : 'return false;'}">
                         <i class="fas fa-link me-1"></i>Form Link
                     </button>
@@ -764,7 +762,7 @@ function templateCardHtml(t) {
                                 <li><a class=\"dropdown-item\" href=\"#\" onclick=\"exportTemplate(${safeId})\">Export Template</a></li>
                                 <li><a class=\"dropdown-item\" href=\"${formUrl}\" target=\"_blank\">Preview Form</a></li>
                                 <li><hr class=\"dropdown-divider\"></li>
-                                <li><a class=\"dropdown-item text-danger\" href=\"#\" onclick=\"archiveTemplate(${safeId})\">Archive</a></li>
+                                <li><a class=\"dropdown-item text-danger\" href=\"#\" onclick=\"deleteTemplate(${safeId})\">Delete</a></li>
                             ` : `
                                 <li><a class=\"dropdown-item\" href=\"#\" onclick=\"publishTemplate(${safeId})\">Publish Template</a></li>
                                 <li><a class=\"dropdown-item\" href=\"#\" onclick=\"exportTemplate(${safeId})\">Export Template</a></li>

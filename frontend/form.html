@@ -182,12 +182,7 @@
                             </button>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-outline-primary me-2" id="saveProgressBtn">
-                                <i class="fas fa-save me-2"></i>Save Progress
-                            </button>
-                            <button type="submit" class="btn btn-primary" id="generateBtn">
-                                <i class="fas fa-file-export me-2"></i>Generate Document
-                            </button>
+                            <!-- Save Progress and Generate Document buttons removed per request -->
                         </div>
                     </div>
                 </div>
@@ -256,5 +251,28 @@
     <!-- html2pdf for PDF export from preview -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="js/form-generator.js?v=20251010"></script>
+    <script>
+        // Hide the Download PDF button inside the preview modal when the modal opens
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    const previewModalEl = document.getElementById('previewModal');
+                    if (!previewModalEl) return;
+
+                    previewModalEl.addEventListener('show.bs.modal', function () {
+                        const btn = document.getElementById('downloadPreviewBtn');
+                        if (btn) btn.style.display = 'none';
+                    });
+
+                    previewModalEl.addEventListener('hidden.bs.modal', function () {
+                        const btn = document.getElementById('downloadPreviewBtn');
+                        if (btn) btn.style.display = '';
+                    });
+                } catch (e) {
+                    console.warn('Preview modal toggle script error', e);
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

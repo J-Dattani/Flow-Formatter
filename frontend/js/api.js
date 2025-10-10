@@ -631,23 +631,28 @@ const TemplateAPI = {
     getAll: async () => {
         try {
             const supa = window.__supabaseClient || window.supabaseClient;
-            if (!supa) throw new Error('Supabase client not initialized');
-            // If not authenticated, use local fallback (prototype UX)
-            const sess = await supa.auth.getSession();
-            const isAuthed = !!sess?.data?.session?.user?.id;
-            if (!isAuthed) {
+            // If Supabase client isn't available, immediately fall back to local store
+            if (!supa) {
+                console.warn('Supabase client not initialized — falling back to LocalTemplateStore');
                 return LocalTemplateStore.getAll();
             }
+
+            // Try to fetch templates from Supabase regardless of session state.
+            // If RLS or permissions prevent access, we will catch the error and fall back.
             const { data, error } = await supa
                 .from('templates')
                 .select('id, name, category, updated_at, metadata')
                 .order('updated_at', { ascending: false });
-            if (error) throw error;
-            // If no data, still return empty list
+
+            if (error) {
+                console.warn('Supabase templates fetch failed, falling back to local store:', error.message || error);
+                return LocalTemplateStore.getAll();
+            }
+
             return { success: true, data: data || [] };
         } catch (e) {
-            console.error('Template getAll error:', e);
-            return { success: false, error: e.message };
+            console.error('Template getAll unexpected error:', e);
+            return LocalTemplateStore.getAll();
         }
     },
     
@@ -858,7 +863,69 @@ const AuthorsAPI = {
             await simulateDelay();
             return { success: true, data: MOCK_DATA.authors };
         }
-        return await apiCall('/authors');
+
+        // Prefer Supabase client when available
+        try {
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (!supa) {
+                // Fallback to existing backend endpoint
+                return await apiCall('/authors');
+            }
+
+            // Fetch user profiles
+            const { data: users, error: usersErr } = await supa
+                .from('users')
+                .select('id, name, email, role, department, status, bio, created_at, last_active')
+                .order('created_at', { ascending: false });
+
+            if (usersErr) {
+                console.warn('Supabase users fetch failed, falling back to backend:', usersErr.message || usersErr);
+                return await apiCall('/authors');
+            }
+
+            const userIds = (users || []).map(u => u.id).filter(Boolean);
+            let docs = [];
+            if (userIds.length) {
+                const { data: docsData, error: docsErr } = await supa
+                    .from('documents')
+                    .select('created_by, status')
+                    .in('created_by', userIds);
+
+                if (docsErr) {
+                    console.warn('Supabase documents fetch failed (counts will be zero):', docsErr.message || docsErr);
+                } else {
+                    docs = docsData || [];
+                }
+            }
+
+            // Map users to author shape expected by UI, computing counts from documents
+            const authors = (users || []).map(u => {
+                const userDocs = docs.filter(d => String(d.created_by) === String(u.id));
+                const documents_count = userDocs.length;
+                const completed_count = userDocs.filter(d => ['completed', 'published'].includes((d.status || '').toLowerCase())).length;
+                const pending_count = documents_count - completed_count;
+
+                return {
+                    id: u.id,
+                    name: u.name || u.email,
+                    email: u.email,
+                    role: u.role || 'contributor',
+                    department: u.department || '',
+                    status: u.status || 'active',
+                    bio: u.bio || '',
+                    documents_count,
+                    pending_count,
+                    completed_count,
+                    created_at: u.created_at,
+                    last_active: u.last_active || null
+                };
+            });
+
+            return { success: true, data: authors };
+        } catch (e) {
+            console.error('AuthorsAPI.getAll unexpected error:', e);
+            return await apiCall('/authors');
+        }
     },
 
     create: async (authorData) => {
@@ -876,7 +943,49 @@ const AuthorsAPI = {
             MOCK_DATA.authors.push(newAuthor);
             return { success: true, data: newAuthor };
         }
-        return await apiCall('/authors', { method: 'POST', body: authorData });
+
+        try {
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (!supa) {
+                return await apiCall('/authors', { method: 'POST', body: authorData });
+            }
+
+            const payload = {
+                name: authorData.name,
+                email: authorData.email,
+                role: authorData.role,
+                department: authorData.department || null,
+                status: authorData.status || 'pending',
+                bio: authorData.bio || null
+            };
+
+            const { data, error } = await supa.from('users').insert(payload).select('id, name, email, role, department, status, bio, created_at, last_active').single();
+            if (error) {
+                console.warn('Supabase create user failed, falling back to backend:', error.message || error);
+                return await apiCall('/authors', { method: 'POST', body: authorData });
+            }
+
+            // Shape to UI contract
+            const created = {
+                id: data.id,
+                name: data.name || data.email,
+                email: data.email,
+                role: data.role || 'contributor',
+                department: data.department || '',
+                status: data.status || 'pending',
+                bio: data.bio || '',
+                documents_count: 0,
+                pending_count: 0,
+                completed_count: 0,
+                created_at: data.created_at,
+                last_active: data.last_active || null
+            };
+
+            return { success: true, data: created };
+        } catch (e) {
+            console.error('AuthorsAPI.create error:', e);
+            return await apiCall('/authors', { method: 'POST', body: authorData });
+        }
     },
 
     update: async (id, authorData) => {
@@ -889,7 +998,49 @@ const AuthorsAPI = {
             }
             throw new Error('Author not found');
         }
-        return await apiCall(`/authors/${id}`, { method: 'PUT', body: authorData });
+
+        try {
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (!supa) {
+                return await apiCall(`/authors/${id}`, { method: 'PUT', body: authorData });
+            }
+
+            const payload = {
+                name: authorData.name,
+                email: authorData.email,
+                role: authorData.role,
+                department: authorData.department || null,
+                status: authorData.status || null,
+                bio: authorData.bio || null
+            };
+
+            const { data, error } = await supa.from('users').update(payload).eq('id', id).select('id, name, email, role, department, status, bio, created_at, last_active').single();
+            if (error) {
+                console.warn('Supabase update user failed, falling back to backend:', error.message || error);
+                return await apiCall(`/authors/${id}`, { method: 'PUT', body: authorData });
+            }
+
+            const updated = {
+                id: data.id,
+                name: data.name || data.email,
+                email: data.email,
+                role: data.role || 'contributor',
+                department: data.department || '',
+                status: data.status || 'active',
+                bio: data.bio || '',
+                // counts will be unchanged here; frontend will refresh if needed
+                documents_count: authorData.documents_count || 0,
+                pending_count: authorData.pending_count || 0,
+                completed_count: authorData.completed_count || 0,
+                created_at: data.created_at,
+                last_active: data.last_active || null
+            };
+
+            return { success: true, data: updated };
+        } catch (e) {
+            console.error('AuthorsAPI.update error:', e);
+            return await apiCall(`/authors/${id}`, { method: 'PUT', body: authorData });
+        }
     },
 
     delete: async (id) => {
@@ -902,7 +1053,24 @@ const AuthorsAPI = {
             }
             throw new Error('Author not found');
         }
-        return await apiCall(`/authors/${id}`, { method: 'DELETE' });
+
+        try {
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (!supa) {
+                return await apiCall(`/authors/${id}`, { method: 'DELETE' });
+            }
+
+            const { error } = await supa.from('users').delete().eq('id', id);
+            if (error) {
+                console.warn('Supabase delete user failed, falling back to backend:', error.message || error);
+                return await apiCall(`/authors/${id}`, { method: 'DELETE' });
+            }
+
+            return { success: true, data: { id } };
+        } catch (e) {
+            console.error('AuthorsAPI.delete error:', e);
+            return await apiCall(`/authors/${id}`, { method: 'DELETE' });
+        }
     }
 };
 

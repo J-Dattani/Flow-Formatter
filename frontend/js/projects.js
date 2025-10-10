@@ -10,11 +10,49 @@ let projectData = {
 };
 
 // Initialize projects page
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     initializeProjectsPage();
-    loadProjects();
     setupEventListeners();
+
+    // Wait for Supabase client to be ready (avoid race with supabase-client.js initialization)
+    try {
+        await awaitSupabaseClient(5000);
+    } catch (e) {
+        console.warn('Supabase client did not become available within timeout; continuing without it.', e);
+    }
+
+    // Now run data load and realtime subscription (they'll check client presence internally)
+    await loadProjects();
+    setupProjectsRealtimeSubscription();
 });
+
+/**
+ * Await the Supabase client object on window (polling).
+ * Resolves when window.__supabaseClient exists or rejects after timeoutMs.
+ */
+function awaitSupabaseClient(timeoutMs = 5000, intervalMs = 100) {
+    return new Promise((resolve, reject) => {
+        if (window.__supabaseClient) return resolve(window.__supabaseClient);
+        const start = Date.now();
+        const iv = setInterval(() => {
+            if (window.__supabaseClient) {
+                clearInterval(iv);
+                return resolve(window.__supabaseClient);
+            }
+            if (Date.now() - start > timeoutMs) {
+                clearInterval(iv);
+                return reject(new Error('timeout waiting for supabase client'));
+            }
+        }, intervalMs);
+    });
+}
+
+/**
+ * Run a direct select('*') against templates and show raw JSON on the page for debugging
+ */
+async function testTemplatesFetch() {
+    // diagnostics removed
+}
 
 /**
  * Initialize projects page
@@ -23,9 +61,10 @@ function initializeProjectsPage() {
     console.log('Initializing Projects Management...');
     
     // Check authentication
+    // Allow unauthenticated read-only access so templates can be viewed as projects.
     if (!isAuthenticated()) {
-        window.location.href = 'index.html';
-        return;
+        console.warn('Not authenticated — showing read-only projects view.');
+        // continue without redirecting so templates (if publicly readable) can be fetched
     }
     
     // Set active navigation
@@ -37,61 +76,155 @@ function initializeProjectsPage() {
  */
 async function loadProjects() {
     try {
-        // Mock data for prototype
-        const mockProjects = [
-            {
-                id: 1,
-                name: "Q3 Financial Report",
-                description: "Annual report compilation",
-                template: "Annual Report 2024",
-                authors: [
-                    { initials: "JS", name: "John Smith" },
-                    { initials: "AD", name: "Alice Davis" },
-                    { initials: "MJ", name: "Mike Johnson" }
-                ],
-                progress: 85,
-                status: "review",
-                dueDate: "2024-10-15",
-                createdAt: "2024-09-01"
-            },
-            {
-                id: 2,
-                name: "AI Research Paper",
-                description: "Machine learning study",
-                template: "Research Paper Template",
-                authors: [
-                    { initials: "MJ", name: "Mike Johnson" },
-                    { initials: "SK", name: "Sarah Kim" }
-                ],
-                progress: 45,
-                status: "active",
-                dueDate: "2024-11-30",
-                createdAt: "2024-09-15"
-            },
-            {
-                id: 3,
-                name: "Company Handbook",
-                description: "Employee manual update",
-                template: "Document Template",
-                authors: [
-                    { initials: "HR", name: "HR Team" },
-                    { initials: "LG", name: "Legal Group" }
-                ],
-                progress: 100,
-                status: "completed",
-                dueDate: "2024-09-20",
-                createdAt: "2024-08-01"
+        // If Supabase client is available, fetch live projects. Otherwise show empty list.
+        let projects = [];
+        if (window.__supabaseClient || window.supabaseClient) {
+            try {
+                const supa = window.__supabaseClient || window.supabaseClient;
+                console.debug('Supabase client object:', supa);
+                // Use templates as projects: map templates -> project-like rows
+                const firstQuery = await supa.from('templates').select('id,name,description,category,metadata,updated_at').order('updated_at', { ascending: false });
+                const data = firstQuery.data;
+                const error = firstQuery.error;
+                console.debug('Templates first query result:', { data, error, status: firstQuery.status });
+                // If the query returned no rows, try a broader select('*') in case columns differ or RLS acts differently
+                if (!error && Array.isArray(data) && data.length === 0) {
+                    console.info('Initial templates query returned 0 rows, trying fallback select(*) to gather more debug info');
+                    const fallback = await supa.from('templates').select('*').limit(20);
+                    console.debug('Templates fallback query result:', { data: fallback.data, error: fallback.error, status: fallback.status });
+                    // If fallback returned rows, use them
+                    if (!fallback.error && Array.isArray(fallback.data) && fallback.data.length > 0) {
+                        projects = fallback.data.map(t => ({
+                            id: t.id,
+                            name: t.name,
+                            description: t.description || (t.metadata && t.metadata.description) || '',
+                            template: t.name || '',
+                            authors: [],
+                            progress: 0,
+                            status: (t.metadata && t.metadata.status) || 'active',
+                            dueDate: null,
+                            createdAt: t.updated_at || t.created_at || null
+                        }));
+                    }
+                }
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    projects = data.map(t => ({
+                        id: t.id,
+                        name: t.name,
+                        description: t.description || (t.metadata && t.metadata.description) || '',
+                        template: t.name || '',
+                        authors: [], // templates do not include authors in this schema
+                        progress: 0,
+                        status: (t.metadata && t.metadata.status) || 'active',
+                        dueDate: null,
+                        createdAt: t.updated_at || null
+                    }));
+                } else {
+                    // If there is an error, surface it clearly; otherwise, warn that data is empty
+                    if (error) {
+                        console.warn('Supabase templates fetch error', error);
+                        // Common cause: RLS/policies blocking anon access. Add a helpful hint.
+                        if (error.message && /permission|policy|forbidden|not authorized|authentication/i.test(error.message)) {
+                            console.warn('Permission error detected. If your Supabase project has Row Level Security (RLS) enabled, ensure the anon role or the current user has a SELECT policy for the `templates` table.');
+                        }
+                    } else {
+                        console.warn('Supabase templates fetch returned no rows (empty array)');
+                    }
+                }
+            } catch (fetchErr) {
+                console.warn('Error fetching templates as projects:', fetchErr);
             }
-        ];
-        
-        projectData.projects = mockProjects;
-        updateProjectStats(mockProjects);
-        renderProjectsTable(mockProjects);
+        }
+
+        projectData.projects = projects;
+            updateProjectStats(projects);
+            console.info('Loaded templates as projects:', projects);
+            renderProjectsTable(projects);
         
     } catch (error) {
         console.error('Error loading projects:', error);
         showErrorMessage('Failed to load projects');
     }
+}
+
+/**
+ * Setup realtime subscription for projects table (Supabase Realtime)
+ */
+function setupProjectsRealtimeSubscription() {
+    try {
+        const supa = window.__supabaseClient || window.supabaseClient;
+        if (!supa || typeof supa.channel !== 'function') {
+            // Older CDN builds may use supa.realtime - try fallback
+            if (!supa) return;
+        }
+
+        // Avoid duplicate subscriptions
+        if (window.__projectsRealtimeSubscribed) return;
+
+        // Use Postgres changes subscription
+        try {
+            const channel = supa.channel('templates_changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'templates' }, payload => {
+                    handleProjectRealtimeEvent(payload);
+                })
+                .subscribe();
+
+            window.__projectsRealtimeChannel = channel;
+            window.__projectsRealtimeSubscribed = true;
+        } catch (e) {
+            // Some Supabase builds (older) use from('projects').on() API
+            try {
+                supa.from('templates').on('*', payload => handleProjectRealtimeEvent(payload)).subscribe();
+                window.__projectsRealtimeSubscribed = true;
+            } catch (e2) {
+                console.warn('Realtime subscription not available', e2);
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to setup projects realtime subscription', e);
+    }
+}
+
+function handleProjectRealtimeEvent(payload) {
+    try {
+        // payload will contain eventType and new/old records depending on the client
+        const type = payload.eventType || payload.type || payload.event;
+        const newRecord = payload.new || payload.record || payload.new_record || null;
+        const oldRecord = payload.old || payload.old_record || null;
+
+        if (type === 'INSERT' || type === 'insert') {
+            const p = mapProjectRow(newRecord);
+            projectData.projects.unshift(p);
+        } else if (type === 'UPDATE' || type === 'update') {
+            const p = mapProjectRow(newRecord);
+            const idx = projectData.projects.findIndex(x => String(x.id) === String(p.id));
+            if (idx !== -1) projectData.projects[idx] = p;
+        } else if (type === 'DELETE' || type === 'delete') {
+            const id = oldRecord?.id || payload.old?.id;
+            projectData.projects = projectData.projects.filter(x => String(x.id) !== String(id));
+        }
+
+        updateProjectStats(projectData.projects);
+        renderProjectsTable(projectData.projects);
+    } catch (e) {
+        console.warn('Error handling realtime project event', e);
+    }
+}
+
+function mapProjectRow(p) {
+    if (!p) return null;
+    return {
+        id: p.id,
+        name: p.name,
+        description: p.description || '',
+        // Some payloads (templates table) use `name` rather than `template`
+        template: p.template || p.name || '',
+        authors: Array.isArray(p.authors) ? p.authors : [],
+        progress: p.progress || 0,
+        status: p.status || 'active',
+        dueDate: p.due_date || p.dueDate || null,
+        createdAt: p.created_at || p.createdAt || null
+    };
 }
 
 /**
@@ -124,6 +257,13 @@ function renderProjectsTable(projects) {
     
     tableBody.innerHTML = '';
     
+    if (!projects || projects.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="6" class="text-center text-muted py-4">No projects found — your templates table is empty.</td>`;
+        tableBody.appendChild(tr);
+        return;
+    }
+
     projects.forEach(project => {
         const row = createProjectRow(project);
         tableBody.appendChild(row);
@@ -165,8 +305,7 @@ function createProjectRow(project) {
             </div>
             <small class="text-muted">${project.progress}% ${project.progress === 100 ? 'Complete' : 'Complete'}</small>
         </td>
-        <td>${statusBadge}</td>
-        <td>${formatDate(project.dueDate)}</td>
+    <td>${statusBadge}</td>
         <td>
             <button class="btn btn-sm btn-outline-primary" onclick="viewProject(${project.id})">
                 <i class="fas fa-eye"></i>
@@ -236,9 +375,11 @@ function getProgressColor(progress) {
  * Get project icon based on template
  */
 function getProjectIcon(template) {
-    if (template.toLowerCase().includes('report')) return 'fas fa-chart-line';
-    if (template.toLowerCase().includes('research')) return 'fas fa-microscope';
-    if (template.toLowerCase().includes('handbook')) return 'fas fa-building';
+    // Guard against missing or non-string template values
+    const t = (template || '').toString().toLowerCase();
+    if (t.includes('report')) return 'fas fa-chart-line';
+    if (t.includes('research')) return 'fas fa-microscope';
+    if (t.includes('handbook')) return 'fas fa-building';
     return 'fas fa-file-alt';
 }
 
@@ -379,7 +520,9 @@ function isDueThisWeek(dueDate) {
 }
 
 function formatDate(dateString) {
+    if (!dateString) return '';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
     return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'short', 

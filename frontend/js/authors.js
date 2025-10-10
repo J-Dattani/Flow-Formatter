@@ -34,7 +34,7 @@ class AuthorsManager {
     async loadAuthors() {
         try {
             const response = await API.getAuthors();
-            this.authors = response.data || response;
+            this.authors = (response && response.success) ? (response.data || []) : (response.data || response || []);
             this.filteredAuthors = [...this.authors];
         } catch (error) {
             console.error('Error loading authors:', error);
@@ -348,11 +348,22 @@ class AuthorsManager {
 
     deleteAuthor(authorId) {
         if (confirm('Are you sure you want to delete this author? This action cannot be undone.')) {
-            // Remove from array
-            this.authors = this.authors.filter(a => a.id !== authorId);
-            this.filteredAuthors = this.filteredAuthors.filter(a => a.id !== authorId);
-            this.renderAuthors();
-            this.showToast('Author deleted successfully!', 'success');
+            // Call backend delete and then update UI
+            (async () => {
+                try {
+                    const res = await API.deleteAuthor(authorId);
+                    const ok = (res && res.success) ? true : !!res;
+                    if (!ok) throw new Error('Delete failed');
+
+                    this.authors = this.authors.filter(a => a.id !== authorId);
+                    this.filteredAuthors = this.filteredAuthors.filter(a => a.id !== authorId);
+                    this.renderAuthors();
+                    this.showToast('Author deleted successfully!', 'success');
+                } catch (e) {
+                    console.error('Error deleting author:', e);
+                    this.showToast('Error deleting author', 'error');
+                }
+            })();
         }
     }
 
@@ -409,7 +420,9 @@ async function addAuthor() {
     }
 
     try {
-        const newAuthor = await API.createAuthor(authorData);
+        const res = await API.createAuthor(authorData);
+        const newAuthor = (res && res.success) ? (res.data) : (res || null);
+        if (!newAuthor) throw new Error('Failed to create author');
         authorsManager.authors.push(newAuthor);
         authorsManager.filteredAuthors = [...authorsManager.authors];
         authorsManager.renderAuthors();
@@ -442,8 +455,10 @@ async function updateAuthor() {
     }
 
     try {
-        const updatedAuthor = await API.updateAuthor(authorId, authorData);
-        
+        const res = await API.updateAuthor(authorId, authorData);
+        const updatedAuthor = (res && res.success) ? (res.data) : (res || null);
+        if (!updatedAuthor) throw new Error('Failed to update author');
+
         // Update in arrays
         const index = authorsManager.authors.findIndex(a => a.id === authorId);
         if (index !== -1) {

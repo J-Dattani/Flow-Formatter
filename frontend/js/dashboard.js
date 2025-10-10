@@ -4,8 +4,36 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
+    (async () => {
+        // wait briefly for supabase client to initialize, if present
+        try {
+            await awaitSupabaseClient(5000);
+        } catch (e) {
+            console.warn('Supabase client not available before dashboard init:', e.message || e);
+        }
+        loadDashboardData();
+    })();
 });
+
+/**
+ * Reuse the helper used on projects page to await the supabase client
+ */
+function awaitSupabaseClient(timeoutMs = 5000, intervalMs = 100) {
+    return new Promise((resolve, reject) => {
+        if (window.__supabaseClient) return resolve(window.__supabaseClient);
+        const start = Date.now();
+        const iv = setInterval(() => {
+            if (window.__supabaseClient) {
+                clearInterval(iv);
+                return resolve(window.__supabaseClient);
+            }
+            if (Date.now() - start > timeoutMs) {
+                clearInterval(iv);
+                return reject(new Error('timeout waiting for supabase client'));
+            }
+        }, intervalMs);
+    });
+}
 
 /**
  * Load all dashboard data
@@ -147,14 +175,36 @@ async function loadTemplateStats() {
     if (!statsContainer) return;
     
     try {
-        // Mock data for prototype
-        const mockStats = [
-            { name: 'Report', percentage: 45, color: 'primary' },
-            { name: 'Resume', percentage: 30, color: 'success' },
-            { name: 'Academic', percentage: 25, color: 'warning' }
-        ];
-        
-        displayTemplateStats(mockStats);
+        const supa = window.__supabaseClient || window.supabaseClient;
+        if (!supa) {
+            // Fallback to mock if no client
+            displayTemplateStats([
+                { name: 'Report', percentage: 45, color: 'primary' },
+                { name: 'Resume', percentage: 30, color: 'success' },
+                { name: 'Academic', percentage: 25, color: 'warning' }
+            ]);
+            return;
+        }
+
+        // Query grouped counts by category (or fallback to metadata->type if category missing)
+        // We'll request a simple select and compute percentages client-side
+        const { data: templates, error } = await supa.from('templates').select('id, name, category, metadata');
+        if (error) throw error;
+        if (!templates || templates.length === 0) {
+            statsContainer.innerHTML = '<p class="text-center text-muted">No template statistics available</p>';
+            return;
+        }
+
+        const counts = {};
+        templates.forEach(t => {
+            const cat = (t.category || (t.metadata && t.metadata.type) || 'Uncategorized').toString();
+            counts[cat] = (counts[cat] || 0) + 1;
+        });
+
+        const total = templates.length;
+        const palette = ['primary','success','warning','info','secondary'];
+        const stats = Object.keys(counts).map((k, i) => ({ name: k, percentage: Math.round((counts[k] / total) * 100), color: palette[i % palette.length] }));
+        displayTemplateStats(stats);
     } catch (error) {
         console.error('Error loading template stats:', error);
         statsContainer.innerHTML = '<p class="text-center text-danger">Error loading statistics</p>';
