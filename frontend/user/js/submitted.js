@@ -85,9 +85,9 @@ class SubmissionDashboard {
                 this.handleAction(action, submissionId);
             }
 
-            // Logout button
-            if (e.target.closest('.logout-btn')) {
-                this.handleLogout();
+            // Logout button (global handler from auth.js)
+            if (e.target.closest('.logout-btn') && typeof handleLogout === 'function') {
+                handleLogout(e);
             }
 
             // Notification button
@@ -809,12 +809,7 @@ class SubmissionDashboard {
         });
     }
 
-    handleLogout() {
-        this.showToast('info', 'Logging out...', 'Redirecting to login page');
-        setTimeout(() => {
-            window.location.href = '../admin/index.html';
-        }, 2000);
-    }
+    // Logout handled by shared auth.js
 
     showToast(type, title, message) {
         const toastContainer = document.getElementById('toastContainer');

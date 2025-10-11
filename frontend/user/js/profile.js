@@ -196,52 +196,115 @@ class ProfileManager {
      * @returns {Promise} A promise that resolves when data is loaded
      */
     loadUserProfile() {
-        return new Promise((resolve, reject) => {
-            if (this.dataMode === 'api') {
-                // Make actual API call to get user data
-                fetch('/api/users/profile')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`API error: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        this.userData = data;
-                        resolve(data);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching user profile:', error);
-                        reject(error);
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Prefer Supabase session (frontend fallback) to identify the logged-in user
+                const supa = window.__supabaseClient || window.supabaseClient;
+                let sessionUser = null;
+                try {
+                    if (supa && supa.auth && typeof supa.auth.getSession === 'function') {
+                        const { data } = await supa.auth.getSession();
+                        sessionUser = data?.session?.user || null;
+                    }
+                } catch (_) {}
+
+                // If backend provides a current-user endpoint, try it first
+                try {
+                    const token = (typeof getAuthToken === 'function') ? getAuthToken() : null;
+                    const resp = await fetch('http://127.0.0.1:8000/api/users/me', {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                     });
-            } else {
-                // Static mode - use demo data with simulated delay
-                const delay = window.AppConfig?.dataMode?.demoDelay || 500;
-                
+                    if (resp.ok) {
+                        const j = await resp.json().catch(() => (null));
+                        if (j && (j.success || j.id || j.email || j.data)) {
+                            const raw = j.data || j; // normalize possible shapes
+                            const mapped = this._shapeUserProfile(raw);
+                            this.userData = mapped;
+                            return resolve(mapped);
+                        }
+                    }
+                } catch (_) { /* fall through */ }
+
+                // Supabase direct fallback based on session email/id
+                if (supa && (sessionUser?.id || sessionUser?.email)) {
+                    try {
+                        let query = supa.from('users').select('id,email,name,role,department,bio,created_at').limit(1);
+                        if (sessionUser.id) query = query.eq('id', sessionUser.id);
+                        else if (sessionUser.email) query = query.eq('email', sessionUser.email);
+                        const { data, error } = await query.single();
+                        if (!error && data) {
+                            const mapped = this._shapeUserProfile(data);
+                            this.userData = mapped;
+                            return resolve(mapped);
+                        }
+                    } catch (e) {
+                        console.warn('Supabase profile fetch failed:', e?.message || e);
+                    }
+                }
+
+                // As a last resort, try to read a stored user in memory from login
+                const fallbackUser = (window.currentUser || null);
+                if (fallbackUser) {
+                    const mapped = this._shapeUserProfile(fallbackUser);
+                    this.userData = mapped;
+                    return resolve(mapped);
+                }
+
+                // Final fallback: mock data so UI stays usable
+                const delay = window.AppConfig?.dataMode?.demoDelay || 300;
                 setTimeout(() => {
-                    // Mock user data
-                    this.userData = {
-                        firstName: 'Sarah',
-                        lastName: 'Johnson',
-                        fullName: 'Sarah Johnson',
-                        email: 'sarah.johnson@email.com',
-                        title: 'Senior Project Manager',
-                        phone: '+1 (555) 123-4567',
-                        website: 'https://sarahjohnson.com',
-                        location: 'New York, NY',
-                        timezone: 'EST',
+                    const mock = {
+                        firstName: 'User',
+                        lastName: 'Profile',
+                        fullName: 'User Profile',
+                        email: 'user@example.com',
+                        title: 'Member',
+                        phone: '',
+                        website: '',
+                        location: '',
+                        timezone: 'UTC',
                         language: 'English',
-                        bio: 'Experienced project manager with 8+ years in tech industry. Passionate about streamlining workflows and delivering exceptional results.',
-                        joined: 'January 2023',
+                        bio: '',
+                        joined: '',
                         avatar: null,
-                        publishedCount: 15,
-                        inProgressCount: 8,
-                        followersCount: '2.5K'
+                        publishedCount: 0,
+                        inProgressCount: 0,
+                        followersCount: '0'
                     };
-                    resolve(this.userData);
+                    this.userData = mock;
+                    resolve(mock);
                 }, delay);
+            } catch (err) {
+                reject(err);
             }
         });
+    }
+
+    _shapeUserProfile(raw) {
+        if (!raw) return {};
+        const email = raw.email || '';
+        const name = raw.name || raw.fullName || '';
+        const firstName = raw.first_name || (name ? String(name).split(' ')[0] : '');
+        const lastName = raw.last_name || (name && String(name).includes(' ') ? String(name).split(' ').slice(1).join(' ') : '');
+        const fullName = (raw.fullName) || (name ? name : [firstName, lastName].filter(Boolean).join(' ')) || email;
+        return {
+            firstName,
+            lastName,
+            fullName,
+            email,
+            title: raw.title || raw.role || 'Member',
+            phone: raw.phone || '',
+            website: raw.website || '',
+            location: raw.location || '',
+            timezone: raw.timezone || 'UTC',
+            language: raw.language || 'English',
+            bio: raw.bio || '',
+            joined: raw.created_at ? new Date(raw.created_at).toLocaleDateString() : '',
+            avatar: raw.avatar || null,
+            publishedCount: raw.publishedCount || 0,
+            inProgressCount: raw.inProgressCount || 0,
+            followersCount: raw.followersCount || '0'
+        };
     }
     
     /**

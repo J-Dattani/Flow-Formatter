@@ -49,9 +49,9 @@ async function checkAuthentication() {
         console.warn('Auth check error:', e);
     }
 
-    // If not authenticated and not on a public page, redirect to user login
+    // If not authenticated and not on a public page, redirect to users index (login page not present)
     if (!isAuthenticated && !isPublicPage) {
-        window.location.href = '/user/login.html';
+        window.location.href = '/user/index.html';
         return;
     }
 
@@ -107,11 +107,9 @@ function initializeAuthHandlers() {
         signupForm.addEventListener('submit', handleSignup);
     }
     
-    // Logout button handler
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
+    // Logout button handler (support both id and class)
+    const logoutButtons = document.querySelectorAll('#logoutBtn, .logout-btn');
+    logoutButtons.forEach(btn => btn.addEventListener('click', handleLogout));
 }
 
 /**
@@ -143,9 +141,12 @@ async function handleLogin(e) {
                 setAuthToken(result.data.token);
             }
             // Store user info in memory
-            window.currentUser = result.data.user;
-            // Redirect based on user role
-            if (email === 'admin@example.com') {
+            const user = (result.data && result.data.user) ? result.data.user : null;
+            window.currentUser = user;
+            try { if (user) localStorage.setItem('currentUser', JSON.stringify(user)); } catch (_) {}
+            const userEmail = (user && user.email) ? user.email.toLowerCase() : (email || '').toLowerCase();
+            // Redirect based on returned user email
+            if (userEmail === 'admin@example.com') {
                 window.location.href = '../admin/dashboard.html';
             } else {
                 window.location.href = 'dashboard.html';
@@ -168,9 +169,7 @@ async function handleLogin(e) {
  * Handle logout
  */
 async function handleLogout(e) {
-    if (e && e.preventDefault) {
-        e.preventDefault();
-    }
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     
     try {
         // Call logout API (Supabase signOut + token clear)
@@ -182,10 +181,8 @@ async function handleLogout(e) {
         clearAuthToken();
         window.currentUser = null;
 
-        // Redirect target: admin pages go to the public user login, others go to local index
-        const ADMIN_LOGOUT_REDIRECT = 'http://127.0.0.1:3000/user/index.html';
-        const isAdmin = (window.location.pathname || '').includes('/admin/');
-        window.location.href = isAdmin ? ADMIN_LOGOUT_REDIRECT : 'index.html';
+        // Always redirect to the users index page (login page not present)
+        window.location.href = '/user/index.html';
     }
 }
 
@@ -201,7 +198,16 @@ function showError(element, message) {
  * Get current user info
  */
 function getCurrentUser() {
-    return window.currentUser || null;
+    if (window.currentUser) return window.currentUser;
+    try {
+        const s = localStorage.getItem('currentUser');
+        if (s) {
+            const u = JSON.parse(s);
+            window.currentUser = u;
+            return u;
+        }
+    } catch (_) {}
+    return null;
 }
 
 /**

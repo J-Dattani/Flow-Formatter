@@ -2,16 +2,71 @@
 
 class Dashboard {
     constructor() {
-        this.books = this.getMockBooks();
-        this.filteredBooks = [...this.books];
+        this.books = [];
+        this.filteredBooks = [];
         this.currentFilter = 'all';
         this.init();
     }
 
     init() {
         this.bindEvents();
-        this.renderBooks();
+        this.loadData();
         this.initializeAnimations();
+    }
+
+    // Utility: detect if a string is an email
+    isEmail(str) {
+        if (!str || typeof str !== 'string') return false;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+    }
+
+    // Utility: mask an email address for display
+    // Keeps first and last character of local-part when length > 2; masks the middle with *
+    // Example: "jaimindattani343@gmail.com" -> "j*************3@gmail.com"
+    //          "343@gmail.com" -> "3*3@gmail.com"
+    maskEmail(email) {
+        if (!this.isEmail(email)) return email;
+        const [local, domain] = email.split('@');
+        if (!domain) return email;
+        if (!local || local.length <= 2) return `***@${domain}`;
+        const first = local[0];
+        const last = local[local.length - 1];
+        const maskedMiddle = '*'.repeat(Math.max(local.length - 2, 1));
+        return `${first}${maskedMiddle}${last}@${domain}`;
+    }
+
+    // Build a URL-safe base64 string
+    toBase64Url(str) {
+        try {
+            const b64 = btoa(unescape(encodeURIComponent(str)));
+            return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+        } catch (_) {
+            // Fallback if Unicode handling fails
+            const b64 = btoa(str);
+            return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+        }
+    }
+
+    // Build the form fill URL for a given template object
+    buildFormUrl(tpl) {
+        if (!tpl) return '/form.html';
+        const id = tpl.id || 'preview';
+        const name = tpl.name || 'Template';
+        const embedded = {
+            id,
+            name,
+            description: tpl.description || '',
+            metadata: {
+                editor: {
+                    content: (tpl?.metadata?.editor?.content) || tpl?.metadata?.content || tpl?.content || []
+                },
+                files: Array.isArray(tpl?.metadata?.files) ? tpl.metadata.files : []
+            },
+            status: tpl.metadata?.status || tpl.status || 'draft',
+            published_at: tpl.published_at || tpl.metadata?.published_at || null
+        };
+        const tplParam = this.toBase64Url(JSON.stringify(embedded));
+        return `/form.html?template=${encodeURIComponent(String(id))}&name=${encodeURIComponent(String(name))}&tpl=${tplParam}`;
     }
 
     bindEvents() {
@@ -50,10 +105,7 @@ class Dashboard {
                 this.showNotifications();
             }
 
-            // Logout button
-            if (e.target.closest('.logout-btn')) {
-                this.handleLogout();
-            }
+            // Logout button handled by shared auth.js; no-op here
         });
 
         // Close menus when clicking outside
@@ -97,76 +149,86 @@ class Dashboard {
         });
     }
 
-    getMockBooks() {
-        return [
-            {
-                id: 1,
-                title: "Advanced JavaScript Techniques",
-                description: "A comprehensive guide to modern JavaScript patterns and best practices",
-                status: "published",
-                totalChapters: 12,
-                completedChapters: 12,
-                progress: 100,
-                publishDate: "Jan 2024",
-                contributors: [
-                    { name: "Sarah Johnson", initials: "SJ" },
-                    { name: "Mike Chen", initials: "MC" },
-                    { name: "Lisa Wang", initials: "LW" },
-                    { name: "David Brown", initials: "DB" },
-                    { name: "Emma Davis", initials: "ED" }
-                ],
-                chapters: [
-                    { id: 1, title: "Introduction to Modern JavaScript", status: "completed", author: "Sarah Johnson" },
-                    { id: 2, title: "ES6+ Features", status: "completed", author: "Mike Chen" },
-                    { id: 3, title: "Async Programming", status: "completed", author: "Lisa Wang" }
-                ]
-            },
-            {
-                id: 2,
-                title: "React Best Practices",
-                description: "Modern React development patterns and performance optimization",
-                status: "draft",
-                totalChapters: 15,
-                completedChapters: 8,
-                progress: 65,
-                publishDate: "In Progress",
-                contributors: [
-                    { name: "Alex Rodriguez", initials: "AR" },
-                    { name: "Emma Davis", initials: "ED" },
-                    { name: "Tom Wilson", initials: "TW" }
-                ],
-                chapters: [
-                    { id: 1, title: "React Fundamentals", status: "completed", author: "Alex Rodriguez" },
-                    { id: 2, title: "Component Patterns", status: "completed", author: "Emma Davis" },
-                    { id: 3, title: "State Management", status: "in-progress", author: "Tom Wilson" }
-                ]
-            },
-            {
-                id: 3,
-                title: "Python Data Science Handbook",
-                description: "Comprehensive guide to data analysis and machine learning with Python",
-                status: "collaboration",
-                totalChapters: 20,
-                completedChapters: 5,
-                progress: 25,
-                publishDate: "2 weeks left",
-                contributors: [
-                    { name: "Data Scientist", initials: "DS" },
-                    { name: "ML Engineer", initials: "ML" },
-                    { name: "Research Lead", initials: "RL" },
-                    { name: "Analytics Expert", initials: "AE" },
-                    { name: "Python Developer", initials: "PD" },
-                    { name: "Statistics Pro", initials: "SP" },
-                    { name: "AI Researcher", initials: "AI" },
-                    { name: "Data Engineer", initials: "DE" }
-                ],
-                chapters: [
-                    { id: 1, title: "Introduction to Data Science", status: "completed", author: "Data Scientist" },
-                    { id: 2, title: "NumPy Fundamentals", status: "completed", author: "Python Developer" },
-                    { id: 3, title: "Pandas for Data Analysis", status: "in-progress", author: "Analytics Expert" }
-                ]
+    async loadData() {
+        try {
+            // Load templates as books (backend-first via TemplateAPI)
+            const tplRes = await TemplateAPI.getAll();
+            const templates = Array.isArray(tplRes?.data) ? tplRes.data : [];
+
+            // Map templates to dashboard "book" cards
+            this.books = templates.map(t => this.templateToBook(t));
+            this.filteredBooks = [...this.books];
+            this.renderBooks();
+
+            // Update welcome name (mask emails)
+            const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : (window.currentUser || null);
+            if (user) {
+                const el = document.querySelector('.welcome-title .user-name');
+                if (el) {
+                    const raw = user.name || user.email || 'User';
+                    el.textContent = this.isEmail(raw) ? this.maskEmail(raw) : (user.name || (user.email ? this.maskEmail(user.email) : 'User'));
+                }
             }
-        ];
+
+            // Update quick stats from backend dashboard API (fallback handled inside DashboardAPI)
+            if (typeof DashboardAPI !== 'undefined' && DashboardAPI.getStats) {
+                const statsRes = await DashboardAPI.getStats();
+                this.updateQuickStats(statsRes?.data || {});
+            } else {
+                this.updateQuickStats({ templates: this.books.length, authors: 0, pendingSubmissions: 0, generatedDocuments: 0 });
+            }
+        } catch (e) {
+            console.error('Dashboard load error:', e);
+            this.renderBooks();
+        }
+    }
+
+    templateToBook(tpl) {
+        const name = tpl.name || 'Untitled Template';
+        const desc = (tpl.metadata && tpl.metadata.description) || tpl.description || '';
+        const status = (tpl.metadata && tpl.metadata.status) || 'draft';
+        const updated = tpl.updated_at ? new Date(tpl.updated_at).toLocaleDateString() : '';
+        // Derive simple progress from metadata if present
+        const editor = tpl.metadata?.editor || {};
+        const chapters = Array.isArray(tpl.chapters) ? tpl.chapters : [];
+        const totalChapters = chapters.length || (editor.totalChapters || 0);
+        const completedChapters = editor.completedChapters || 0;
+        const progress = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : (status === 'published' ? 100 : 0);
+        // Contributors unavailable here; keep minimal initials from name
+        const contributors = (tpl.contributors && Array.isArray(tpl.contributors)) ? tpl.contributors : [];
+        const shapedContribs = contributors.map(c => {
+            const rawName = c.name || c.email || 'Contributor';
+            const displayName = this.isEmail(rawName) ? this.maskEmail(rawName) : rawName;
+            const initialsSource = (c.name || c.email || '?');
+            return { name: displayName, initials: initialsSource.slice(0,2).toUpperCase() };
+        });
+        const formUrl = this.buildFormUrl(tpl);
+        return {
+            id: tpl.id,
+            title: name,
+            description: desc,
+            status: String(status).toLowerCase(),
+            totalChapters: totalChapters || 1,
+            completedChapters: Math.min(completedChapters, totalChapters || 1),
+            progress,
+            publishDate: updated,
+            contributors: shapedContribs,
+            formUrl,
+            chapters: chapters.map((ch, idx) => ({ id: ch.id || idx+1, title: ch.title || `Chapter ${idx+1}`, status: ch.status || 'completed', author: ch.author || '—' }))
+        };
+    }
+
+    updateQuickStats(stats) {
+        // There are 4 stat cards with numbers; update their .stat-number
+        const cards = document.querySelectorAll('.quick-stats .stat-card .stat-number');
+        if (!cards || cards.length < 4) return;
+        // Map: Active Books -> templates length; Published -> estimated published; Contributors -> authors; Pending -> pending submissions
+        const activeBooks = this.books.length;
+        const published = this.books.filter(b => b.status === 'published').length;
+        const contributors = Number(stats.authors || 0);
+        const pending = Number(stats.pendingSubmissions || 0);
+        const values = [activeBooks, published, contributors, pending];
+        values.forEach((v, i) => { if (cards[i]) cards[i].textContent = String(v); });
     }
 
     handleSearch(query) {
@@ -223,7 +285,11 @@ class Dashboard {
         // Render filtered books
         this.filteredBooks.forEach(book => {
             const bookCard = this.createBookCard(book);
-            booksGrid.insertBefore(bookCard, addBookCard);
+            if (addBookCard) {
+                booksGrid.insertBefore(bookCard, addBookCard);
+            } else {
+                booksGrid.appendChild(bookCard);
+            }
         });
 
         // Animate cards
@@ -365,10 +431,10 @@ class Dashboard {
         switch (book.status) {
             case 'published':
                 return `
-                    <button class="btn-primary" onclick="dashboard.viewBookDetails(${book.id})">
-                        <i class="fas fa-eye"></i>
-                        View Book
-                    </button>
+                    <a class="btn-primary" href="${book.formUrl}">
+                        <i class="fas fa-pen"></i>
+                        Fill
+                    </a>
                     <button class="btn-secondary" onclick="dashboard.handleShare(${book.id})">
                         <i class="fas fa-share"></i>
                         Share
@@ -528,12 +594,7 @@ class Dashboard {
         });
     }
 
-    handleLogout() {
-        this.showToast('info', 'Logging out...', 'Redirecting to login page');
-        setTimeout(() => {
-            window.location.href = '../admin/index.html';
-        }, 2000);
-    }
+    // handleLogout removed; shared auth.js handles consistent logout
 
     showToast(type, title, message) {
         const toastContainer = document.getElementById('toastContainer');

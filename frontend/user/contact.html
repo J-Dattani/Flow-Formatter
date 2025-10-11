@@ -22,8 +22,8 @@
     <nav class="dashboard-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <a href="landing.html">
-                    <i class="fas fa-file-alt brand-icon"></i>
+                <a href="index.html">
+                                       <img src="../assets/logo_white.png" width="50" height="50" alt="FormatFlow Logo" class="brand-logo">
                     <span class="brand-text">FormatFlow</span>
                 </a>
             </div>
@@ -438,6 +438,13 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Supabase and shared clients for backend-first data with fallbacks -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+
     <!-- Custom JS -->
      <!-- <script>
          document.addEventListener("DOMContentLoaded", () => {
@@ -464,6 +471,17 @@
             });
         }
     </script> -->
-    <script src="js/contact.js"></script>
+        <script src="js/contact.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof checkAuthentication === 'function') {
+                    checkAuthentication();
+                }
+                const logoutButtons = document.querySelectorAll('#logoutBtn, .logout-btn');
+                logoutButtons.forEach(btn => btn.addEventListener('click', (e) => {
+                    if (typeof handleLogout === 'function') handleLogout(e);
+                }));
+            });
+        </script>
 </body>
 </html>

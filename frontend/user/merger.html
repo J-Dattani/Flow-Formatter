@@ -22,8 +22,8 @@
     <nav class="dashboard-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <a href="landing.html">
-                    <i class="fas fa-file-alt brand-icon"></i>
+                <a href="index.html">
+                    <img src="../assets/logo_white.png" width="50" height="50" alt="FormatFlow Logo" class="brand-logo">
                     <span class="brand-text">FormatFlow</span>
                 </a>
             </div>
@@ -414,36 +414,6 @@
                 </div>
             </div>
 
-            <!-- Recent Merges -->
-            <div class="recent-merges" id="recentMerges">
-                <h2>Recent Merges</h2>
-                <div class="merges-grid" id="mergesGrid">
-                    <!-- Example merge item (will be populated dynamically by JS) -->
-                    <div class="merge-item">
-                        <h3 class="merge-title">Research Compilation</h3>
-                        <div class="merge-info">
-                            <span>12 pages</span>
-                            <span>3 chapters</span>
-                            <span>2.5 MB</span>
-                        </div>
-                        <div class="merge-date">
-                            <i class="far fa-calendar-alt"></i>
-                            <span>June 15, 2023</span>
-                        </div>
-                        <div class="merge-actions">
-                            <button class="merge-button">
-                                <i class="fas fa-eye"></i>
-                                View
-                            </button>
-                            <button class="merge-button">
-                                <i class="fas fa-download"></i>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                    <!-- More items will be loaded dynamically -->
-                </div>
-            </div>
         </div>
     </main>
 
@@ -454,6 +424,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SortableJS for drag and drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <!-- Supabase and shared clients for backend-first data with fallbacks -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+
     <!-- Custom JS -->
      <!-- <script>
          document.addEventListener("DOMContentLoaded", () => {
@@ -480,6 +457,17 @@
             });
         }
     </script> -->
-    <script src="js/merger-enhanced.js"></script>
+        <script src="js/merger-enhanced.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof checkAuthentication === 'function') {
+                    checkAuthentication();
+                }
+                const logoutButtons = document.querySelectorAll('#logoutBtn, .logout-btn');
+                logoutButtons.forEach(btn => btn.addEventListener('click', (e) => {
+                    if (typeof handleLogout === 'function') handleLogout(e);
+                }));
+            });
+        </script>
 </body>
 </html>

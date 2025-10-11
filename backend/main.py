@@ -6,7 +6,10 @@ app = FastAPI(title="Merger Tool Backend", version="0.1.0")
 # CORS for local file and localhost frontend
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=["*"],
+	allow_origins=[
+		"http://127.0.0.1:3000",
+		"http://localhost:3000",
+	],
 	allow_credentials=True,
 	allow_methods=["*"],
 	allow_headers=["*"],

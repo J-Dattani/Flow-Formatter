@@ -23,8 +23,8 @@
     <nav class="dashboard-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <a href="landing.html">
-                    <i class="fas fa-file-alt brand-icon"></i>
+                <a href="index.html">
+                                       <img src="../assets/logo_white.png" width="50" height="50" alt="FormatFlow Logo" class="brand-logo">
                     <span class="brand-text">FormatFlow</span>
                 </a>
             </div>
@@ -593,46 +593,42 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-     <!-- <script>
-         document.addEventListener("DOMContentLoaded", () => {
-            includeHTML();
-            // Initialize the profile manager
-            window.profileDashboard = new ProfileManager();
-        });
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        function includeHTML() {
-            const elements = document.querySelectorAll("[data-include]");
+        <!-- Supabase and shared client utilities -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="../js/supabase-client.js"></script>
 
-            elements.forEach(el => {
-                const file = el.getAttribute("data-include");
+        <!-- Shared API and Auth (backend-first with Supabase fallbacks) -->
+        <script src="../js/api.js"></script>
+        <script src="../js/auth.js"></script>
 
-                fetch(file)
-                    .then(response => {
-                        if (!response.ok) throw new Error("File not found: " + file);
-                        return response.text();
-                    })
-                    .then(data => {
-                        el.innerHTML = data;
-                        
-                        // Set active state for the current page
-                        const activeLink = el.querySelector('a[href="profile.html"]');
-                        if (activeLink) {
-                            el.querySelectorAll('.nav-link').forEach(link => {
-                                link.classList.remove('active');
-                            });
-                            activeLink.classList.add('active');
-                        }
-                    })
-                    .catch(err => {
-                        el.innerHTML = `<p style="color:red;">${err.message}</p>`;
-                    });
+        <!-- Page config and logic -->
+        <script src="js/config.js"></script>
+        <script src="js/profile.js"></script>
+
+        <!-- Initialize profile page: create ProfileManager and wire logout button -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Ensure auth guard runs for this protected page
+                if (typeof checkAuthentication === 'function') {
+                    checkAuthentication();
+                }
+
+                // Instantiate the profile dashboard controller
+                try {
+                    window.profileDashboard = new ProfileManager();
+                } catch (e) {
+                    console.error('Failed to initialize ProfileManager:', e);
+                }
+
+                // Wire logout button on this page
+                const logoutBtn = document.querySelector('.logout-btn');
+                if (logoutBtn && typeof handleLogout === 'function') {
+                    logoutBtn.addEventListener('click', handleLogout);
+                }
             });
-        }
-    </script> -->
-    <script src="js/config.js"></script>
-    <script src="js/profile.js"></script>
+        </script>
 </body>
 </html>

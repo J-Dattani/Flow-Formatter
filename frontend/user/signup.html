@@ -46,7 +46,7 @@
                 <!-- Logo/Branding -->
                 <div class="signup-header">
                     <div class="logo-placeholder" style="cursor: pointer;" onclick="window.location.href='login.html'" title="Back to login">
-                        <i class="fas fa-file-contract"></i>
+                      <img src="../assets/logo.png" width="50" height="50" alt="FormatFlow Logo" class="brand-logo">
                     </div>
                     <h1>Create Account</h1>
                     <p>Join the Smart Document Merger platform</p>
@@ -278,7 +278,9 @@
         });
     </script>
 
-    <!-- Authentication System -->
+    <!-- Supabase + Authentication System -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
+    <script src="../js/supabase-client.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
 
