@@ -283,7 +283,7 @@ class DocumentMerger {
         const iconClass = `file-icon ${fileObj.type}`;
         
         return `
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center file-text" style="gap:12px;">
                 <div class="drag-handle me-3">
                     <i class="fas fa-grip-vertical"></i>
                 </div>
@@ -292,10 +292,10 @@ class DocumentMerger {
                         <i class="fas ${this.getFileIcon(fileObj.type)}"></i>
                     </div>
                 </div>
-                <div class="flex-grow-1">
+                <div class="flex-grow-1" style="min-width:0;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h6 class="mb-1">${fileObj.name}</h6>
+                            <h6 class="mb-1 file-name">${fileObj.name}</h6>
                             <div class="d-flex align-items-center text-muted small">
                                 <span class="me-3">
                                     <i class="fas fa-file-alt me-1"></i>
@@ -314,9 +314,6 @@ class DocumentMerger {
                         <div class="d-flex align-items-center">
                             <span class="badge bg-primary me-2" id="order-${fileObj.id}">#${index}</span>
                             <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-info" onclick="previewFile('${fileObj.id}')" title="Preview">
-                                    <i class="fas fa-eye"></i>
-                                </button>
                                 <button class="btn btn-outline-danger" onclick="removeFile('${fileObj.id}')" title="Remove">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -708,7 +705,21 @@ function clearAllFiles() {
 }
 
 function addMoreFiles() {
-    document.getElementById('fileInput').click();
+    const existing = document.getElementById('fileInput');
+    const parent = existing.parentElement || document.body;
+    // Clone to reset selection history so the same file can be picked again
+    const clone = existing.cloneNode(true);
+    // Remove old listener to avoid double firing (will be GC'd when removed)
+    existing.remove();
+    parent.appendChild(clone);
+    // Rebind change handler to the merger instance
+    clone.addEventListener('change', (e) => {
+        if (window.documentMerger) {
+            window.documentMerger.handleFiles(e.target.files);
+        }
+    });
+    // Trigger the fresh input
+    clone.click();
 }
 
 function resetMerger() {

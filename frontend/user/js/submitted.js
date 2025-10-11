@@ -408,10 +408,6 @@ class SubmissionDashboard {
                 <i class="fas fa-file-alt"></i>
                 <h3>No submissions found</h3>
                 <p>You haven't submitted any books yet, or no submissions match your current filter.</p>
-                <button class="btn-primary new-submission-btn">
-                    <i class="fas fa-plus"></i>
-                    Submit Your First Book
-                </button>
             </div>
         `;
     }

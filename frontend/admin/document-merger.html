@@ -94,6 +94,17 @@
             cursor: move;
         }
 
+        /* Ensure long file names wrap within available width */
+        .file-item .file-text { min-width: 0; }
+        .file-item .file-name {
+            white-space: normal;
+            overflow-wrap: anywhere; /* modern */
+            word-break: break-word;   /* fallback */
+            hyphens: auto;
+            max-width: 100%;
+            display: block;
+        }
+
         .file-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);

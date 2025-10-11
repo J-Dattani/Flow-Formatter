@@ -1,6 +1,7 @@
 import io
 import base64
 import json
+import hashlib
 from typing import List
 
 import fitz  # PyMuPDF
@@ -374,6 +375,56 @@ def merge_jsons_to_pdf_bytes(toc_pdf_bytes, pages, page_size=(595, 842)):
     return doc.tobytes()
 
 
+def page_signature(doc: fitz.Document, page: fitz.Page) -> str:
+    """Compute a robust content signature for a PDF page including text, images, and links.
+    This helps detect duplicate pages across different input files.
+    """
+    try:
+        # Normalize text
+        raw_text = page.get_text("text") or ""
+        text_norm = " ".join(raw_text.lower().split())
+
+        # Image bytes hashes (sorted)
+        img_hashes = []
+        try:
+            for img in page.get_images(full=True):
+                try:
+                    xref = img[0]
+                    base_image = doc.extract_image(xref)
+                    img_bytes = base_image.get("image") or b""
+                    ih = hashlib.sha256(img_bytes).hexdigest()
+                    img_hashes.append(ih)
+                except Exception:
+                    continue
+        except Exception:
+            pass
+        img_hashes.sort()
+
+        # Link URIs (sorted)
+        link_uris = []
+        try:
+            for ln in page.get_links() or []:
+                uri = (ln.get("uri") or "").strip()
+                if uri:
+                    link_uris.append(uri.lower())
+        except Exception:
+            pass
+        link_uris.sort()
+
+        canon = "|".join([
+            text_norm,
+            ",".join(img_hashes),
+            ",".join(link_uris),
+        ])
+        return hashlib.sha256(canon.encode("utf-8", errors="ignore")).hexdigest()
+    except Exception:
+        # Fallback: use page text only
+        try:
+            return hashlib.sha256((page.get_text("text") or "").encode("utf-8", errors="ignore")).hexdigest()
+        except Exception:
+            return hashlib.sha256(b"").hexdigest()
+
+
 def apply_page_numbers(doc: fitz.Document, page_size=(595, 842), margin=30):
     """Overlay page numbers at bottom-center of each page."""
     W, H = page_size
@@ -464,8 +515,8 @@ async def generate_toc_from_pdf(
 
         # Preload files into memory (name, ctype, data)
         files_data = []
-        import hashlib
-        seen_hashes = set()
+        file_hashes = set()
+        page_hashes = set()
         for f in files:
             name_lower = (f.filename or "").lower()
             ctype = (f.content_type or "").lower()
@@ -547,6 +598,7 @@ async def generate_toc_from_pdf(
             name_lower = fd["name_lower"]
             ctype = fd["ctype"]
             data = fd["data"]
+            base_offset = page_offset
 
             def add_simple_entry(title: str, local_page_start: int = 1):
                 if title:
@@ -554,10 +606,10 @@ async def generate_toc_from_pdf(
 
             # Duplicate detection by content hash
             h = hashlib.sha256(data).hexdigest()
-            if h in seen_hashes:
+            if h in file_hashes:
                 duplicates_skipped.append(fd["name"])
                 continue
-            seen_hashes.add(h)
+            file_hashes.add(h)
 
             # PDF flow
             if ctype == "application/pdf" or name_lower.endswith(".pdf"):
@@ -571,13 +623,10 @@ async def generate_toc_from_pdf(
                     outline = src.get_toc(simple=True) or []
                 except Exception:
                     outline = []
-                if outline:
-                    # outline rows: [level, title, page]
-                    for lvl, title, p in outline:
-                        if isinstance(p, int) and p >= 1:
-                            toc_entries.append((str(title).strip(), page_offset + p, max(0, int(lvl) - 1)))
-                else:
-                    # Fallback: detect headings from first few pages via heuristics
+                detected = []
+                simple_title = None
+                if not outline:
+                    # Fallback: detect headings from first few pages via heuristics (defer page numbers until after dedup)
                     try:
                         pages_like = []
                         limit = min(10, src.page_count)
@@ -594,9 +643,6 @@ async def generate_toc_from_pdf(
                                     })
                             pages_like.append({"page": i+1, "blocks": blocks})
                         detected = extract_headings_from_pages(pages_like)
-                        # ensure local page references
-                        for (t, p, lvl) in detected:
-                            toc_entries.append((t, page_offset + p, lvl))
                         if not detected:
                             # last resort: simple title from first page
                             p0 = src.load_page(0)
@@ -611,15 +657,46 @@ async def generate_toc_from_pdf(
                                             if len(t) >= 2:
                                                 if not best or sz > best[0]:
                                                     best = (sz, t)
-                            if best:
-                                add_simple_entry(best[1], 1)
-                            else:
-                                add_simple_entry(fd["name"])
+                            simple_title = (best[1] if best else fd["name"]) if src.page_count > 0 else None
                     except Exception:
-                        add_simple_entry(fd["name"])
+                        simple_title = fd["name"]
 
-                merged_doc.insert_pdf(src)
-                page_offset += src.page_count
+                # Insert pages while skipping duplicates by robust per-page signature
+                kept = 0
+                # Only skip duplicates that appeared in previous files to preserve within-file page numbering
+                prev_page_hashes = set(page_hashes)
+                # Map original 1-based page -> kept local 1-based page order
+                local_map = {}
+                for i in range(src.page_count):
+                    try:
+                        pg = src.load_page(i)
+                        sig = page_signature(src, pg)
+                        if sig in prev_page_hashes:
+                            duplicates_skipped.append(f"{fd['name']}#page{i+1}")
+                            continue
+                        # keep page: append a single-page doc slice
+                        tmp = fitz.open()
+                        tmp.insert_pdf(src, from_page=i, to_page=i)
+                        merged_doc.insert_pdf(tmp)
+                        tmp.close()
+                        page_hashes.add(sig)
+                        kept += 1
+                        local_map[i+1] = kept
+                    except Exception:
+                        continue
+                # Append TOC entries now that we know which pages were kept
+                if kept > 0:
+                    if outline:
+                        for lvl, title, p in outline:
+                            if isinstance(p, int) and p >= 1 and p in local_map:
+                                toc_entries.append((str(title).strip(), base_offset + local_map[p], max(0, int(lvl) - 1)))
+                    elif detected:
+                        for (t, p, lvl) in detected:
+                            if p in local_map:
+                                toc_entries.append((t, base_offset + local_map[p], lvl))
+                    elif simple_title:
+                        toc_entries.append((simple_title, base_offset + 1, 0))
+                page_offset += kept
                 src.close()
                 continue
 
@@ -642,18 +719,42 @@ async def generate_toc_from_pdf(
                     }
 
                 pdf_bytes, headings = render_docx_to_pdf_with_headings(data, page_size=page_size, margin=(style_profile.get("margin") if style_profile else 50), style_profile=style_profile)
-                if headings:
-                    for title, lvl, local_page in headings:
-                        toc_entries.append((title, page_offset + local_page, min(max(int(lvl),0),2)))
-                else:
-                    add_simple_entry(fd["name"], 1)
+                # For rendered content, also deduplicate at page granularity
                 sub = fitz.open("pdf", pdf_bytes)
-                if str(add_page_breaks).lower() in ("1","true","yes","on") and merged_doc.page_count>0:
-                    # insert blank page as page break before this content
-                    merged_doc.new_page(width=page_size[0], height=page_size[1])
+                kept = 0
+                prev_page_hashes = set(page_hashes)
+                local_map = {}
+                for i in range(sub.page_count):
+                    try:
+                        pg = sub.load_page(i)
+                        sig = page_signature(sub, pg)
+                        if sig in prev_page_hashes:
+                            duplicates_skipped.append(f"{fd['name']}#page{i+1}")
+                            continue
+                        tmp = fitz.open()
+                        tmp.insert_pdf(sub, from_page=i, to_page=i)
+                        merged_doc.insert_pdf(tmp)
+                        tmp.close()
+                        page_hashes.add(sig)
+                        kept += 1
+                        local_map[i+1] = kept
+                    except Exception:
+                        continue
+                # Insert page break only if we kept any pages from this file and it's not the first content
+                if kept > 0 and str(add_page_breaks).lower() in ("1","true","yes","on") and base_offset > 0:
+                    # Insert a blank page before the content we just added
+                    merged_doc.new_page(pno=base_offset, width=page_size[0], height=page_size[1])
+                    base_offset += 1
                     page_offset += 1
-                merged_doc.insert_pdf(sub)
-                page_offset += sub.page_count
+                # Append TOC entries based on kept pages
+                if kept > 0:
+                    if headings:
+                        for title, lvl, local_page in headings:
+                            if local_page in local_map:
+                                toc_entries.append((title, base_offset + local_map[local_page], min(max(int(lvl),0),2)))
+                    else:
+                        toc_entries.append((fd["name"], base_offset + 1, 0))
+                page_offset += kept
                 sub.close()
                 continue
 
@@ -676,17 +777,40 @@ async def generate_toc_from_pdf(
                 pdf_bytes, first_page_local, txt_headings = render_text_to_pdf_with_headings(
                     text, page_size, margin=(style_profile.get("margin") if style_profile else 50), style_profile=style_profile
                 )
-                if txt_headings:
-                    for title, lvl, local_page in txt_headings:
-                        toc_entries.append((title, page_offset + local_page, min(max(int(lvl),0),2)))
-                else:
-                    add_simple_entry(fd["name"], first_page_local)
                 sub = fitz.open("pdf", pdf_bytes)
-                if str(add_page_breaks).lower() in ("1","true","yes","on") and merged_doc.page_count>0:
-                    merged_doc.new_page(width=page_size[0], height=page_size[1])
+                kept = 0
+                prev_page_hashes = set(page_hashes)
+                local_map = {}
+                for i in range(sub.page_count):
+                    try:
+                        pg = sub.load_page(i)
+                        sig = page_signature(sub, pg)
+                        if sig in prev_page_hashes:
+                            duplicates_skipped.append(f"{fd['name']}#page{i+1}")
+                            continue
+                        tmp = fitz.open()
+                        tmp.insert_pdf(sub, from_page=i, to_page=i)
+                        merged_doc.insert_pdf(tmp)
+                        tmp.close()
+                        page_hashes.add(sig)
+                        kept += 1
+                        local_map[i+1] = kept
+                    except Exception:
+                        continue
+                # Insert page break only if we kept any pages from this file and it's not the first content
+                if kept > 0 and str(add_page_breaks).lower() in ("1","true","yes","on") and base_offset > 0:
+                    merged_doc.new_page(pno=base_offset, width=page_size[0], height=page_size[1])
+                    base_offset += 1
                     page_offset += 1
-                merged_doc.insert_pdf(sub)
-                page_offset += sub.page_count
+                # Append TOC entries based on kept pages
+                if kept > 0:
+                    if txt_headings:
+                        for title, lvl, local_page in txt_headings:
+                            if local_page in local_map:
+                                toc_entries.append((title, base_offset + local_map[local_page], min(max(int(lvl),0),2)))
+                    else:
+                        toc_entries.append((fd["name"], base_offset + 1, 0))
+                page_offset += kept
                 sub.close()
                 continue
 

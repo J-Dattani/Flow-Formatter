@@ -12,6 +12,11 @@ class DocumentMerger {
             pageNumbering: 'continuous'
         };
         this.recentMerges = [];
+        // Backend base URL (aligns with backend/api routes)
+        this.apiBase = 'http://127.0.0.1:8000/api';
+        // Last merged Blob and URL for download/preview
+        this.lastMergedBlob = null;
+        this.lastMergedUrl = null;
         this.init();
     }
 
@@ -48,37 +53,30 @@ class DocumentMerger {
     }
 
     bindEvents() {
-        // File upload
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
+    // File upload
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea'); // old layout
+    const uploadZone = document.getElementById('uploadZone'); // new layout
 
         if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                this.handleFileUpload(e.target.files);
+            fileInput.addEventListener('change', async (e) => {
+                await this.handleFileUpload(e.target.files);
             });
         }
 
-        if (uploadArea) {
-            uploadArea.addEventListener('click', () => {
-                fileInput?.click();
-            });
-
-            // Drag and drop events
-            uploadArea.addEventListener('dragover', (e) => {
+        const bindDropArea = (areaEl) => {
+            if (!areaEl) return;
+            areaEl.addEventListener('click', () => fileInput?.click());
+            areaEl.addEventListener('dragover', (e) => { e.preventDefault(); areaEl.classList.add('drag-over'); });
+            areaEl.addEventListener('dragleave', () => areaEl.classList.remove('drag-over'));
+            areaEl.addEventListener('drop', async (e) => {
                 e.preventDefault();
-                uploadArea.classList.add('drag-over');
+                areaEl.classList.remove('drag-over');
+                await this.handleFileUpload(e.dataTransfer.files);
             });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('drag-over');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-                this.handleFileUpload(e.dataTransfer.files);
-            });
-        }
+        };
+        bindDropArea(uploadArea);
+        bindDropArea(uploadZone);
 
         // Next step buttons
         document.querySelectorAll('.next-btn').forEach(btn => {
@@ -100,12 +98,10 @@ class DocumentMerger {
             });
         });
 
-        // Start merge button
+        // Start merge button (old layout)
         const startMergeBtn = document.querySelector('.start-merge-btn');
         if (startMergeBtn) {
-            startMergeBtn.addEventListener('click', () => {
-                this.startMergeProcess();
-            });
+            startMergeBtn.addEventListener('click', async () => { await this.startMergeProcess(); });
         }
 
         // Start over button
@@ -150,27 +146,31 @@ class DocumentMerger {
     }
 
     initializeDragAndDrop() {
-        // Initialize sortable for document arrangement
+        // Initialize sortable for document arrangement (old and new layout)
         const arrangementList = document.getElementById('arrangementList');
-        if (arrangementList) {
-            new Sortable(arrangementList, {
+        const filesList = document.getElementById('filesList');
+        const initSortable = (el) => {
+            if (!el) return;
+            new Sortable(el, {
                 animation: 150,
                 ghostClass: 'arrangement-ghost',
                 onEnd: () => {
                     // Update file order based on DOM
-                    const items = arrangementList.querySelectorAll('.arrangement-item');
+                    const items = el.querySelectorAll('[data-index]');
                     const newOrder = Array.from(items).map(item => parseInt(item.dataset.index));
                     this.reorderFilesByIndices(newOrder);
                 }
             });
-        }
+        };
+        initSortable(arrangementList);
+        initSortable(filesList);
     }
 
     // Navigation methods
     goToStep(step) {
         if (step < 1 || step > 4) return;
         
-        // Hide all sections
+        // Hide all sections (old layout)
         const sections = ['uploadSection', 'arrangeSection', 'settingsSection', 'downloadSection'];
         sections.forEach(id => {
             const section = document.getElementById(id);
@@ -179,19 +179,19 @@ class DocumentMerger {
             }
         });
         
-        // Hide progress section
+        // Hide progress section (old layout)
         const progressSection = document.getElementById('progressSection');
         if (progressSection) {
             progressSection.classList.add('hidden');
         }
         
-        // Show the target section
+        // Show the target section (old layout)
         const targetSection = document.getElementById(sections[step-1]);
         if (targetSection) {
             targetSection.classList.remove('hidden');
         }
         
-        // Update workflow steps
+        // Update workflow steps (old layout)
         document.querySelectorAll('.workflow-step').forEach(workflowStep => {
             const stepNum = parseInt(workflowStep.getAttribute('data-step'));
             workflowStep.classList.remove('active');
@@ -206,15 +206,20 @@ class DocumentMerger {
         if (step === 2) {
             this.updateArrangementList();
         }
+        // Update sidebar steps (new layout)
+        this.updateSidebarSteps(step);
     }
     
     proceedToStep(step) {
         // Validation before proceeding to next step
         if (step === 2) {
-            // Check if there are at least 2 files uploaded
-            if (this.uploadedFiles.length < 2) {
-                this.showToast('Please upload at least 2 files to merge', 'warning');
+            // Allow at least 1 file (merge can still run), but warn for better experience
+            if (this.uploadedFiles.length < 1) {
+                this.showToast('Please upload at least 1 file', 'warning');
                 return;
+            }
+            if (this.uploadedFiles.length === 1) {
+                this.showToast('Merging a single file — no reordering needed.', 'info');
             }
         }
         
@@ -234,11 +239,12 @@ class DocumentMerger {
     }
 
     // File handling methods
-    handleFileUpload(files) {
+    async handleFileUpload(files) {
         if (!files || files.length === 0) return;
         
         // Process each file
-        Array.from(files).forEach(file => {
+        const justAdded = [];
+        for (const file of Array.from(files)) {
             // Validate file type
             const allowedTypes = [
                 'application/pdf', 
@@ -250,20 +256,20 @@ class DocumentMerger {
             
             if (!allowedTypes.includes(file.type)) {
                 this.showToast(`File "${file.name}" is not supported. Please upload PDF, DOC, DOCX, TXT, or RTF files.`, 'error');
-                return;
+                continue;
             }
             
             // Validate file size (max 10MB)
             const maxSize = 10 * 1024 * 1024; // 10MB
             if (file.size > maxSize) {
                 this.showToast(`File "${file.name}" is too large. Maximum file size is 10MB.`, 'error');
-                return;
+                continue;
             }
             
             // Check for duplicates
             if (this.uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
                 this.showToast(`File "${file.name}" is already uploaded.`, 'warning');
-                return;
+                continue;
             }
             
             // Add file to list with metadata
@@ -272,16 +278,26 @@ class DocumentMerger {
                 size: file.size,
                 type: file.type,
                 uploadTime: new Date(),
-                pages: this.estimatePageCount(file), // Estimate page count based on file size
+                pages: this.estimatePageCount(file), // Initial estimate; will refine via backend
                 file: file // Keep reference to the actual file
             };
             
             this.uploadedFiles.push(fileData);
+            justAdded.push(fileData);
             this.showToast(`File "${file.name}" uploaded successfully.`, 'success');
-        });
+        }
         
-        // Update the UI
-        this.updateFileList();
+    // Update the UI
+    this.updateFileList();
+    this.setSidebarStepComplete(1);
+    this.setMergeStatus('Files ready', false);
+
+        // Ask backend for actual per-file pages/words for the newly added files
+        try {
+            await this.refreshFileStats(justAdded);
+        } catch (err) {
+            console.warn('inspect failed', err);
+        }
     }
     
     clearAllFiles() {
@@ -326,58 +342,89 @@ class DocumentMerger {
     }
 
     updateFileList() {
-        const fileListElement = document.getElementById('uploadedFiles');
-        if (!fileListElement) return;
-        
-        if (this.uploadedFiles.length === 0) {
-            fileListElement.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-file-upload"></i>
-                    <p>No files uploaded yet</p>
-                </div>
-            `;
-            return;
-        }
-        
-        fileListElement.innerHTML = '';
-        
-        this.uploadedFiles.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            fileItem.innerHTML = `
-                <div class="file-icon">
-                    <i class="fas fa-file-${this.getFileIcon(file.type)}"></i>
-                </div>
-                <div class="file-info">
-                    <div class="file-name">${file.name}</div>
-                    <div class="file-meta">
-                        <span class="file-type">${this.getFileTypeLabel(file.type)}</span>
-                        <span class="file-size">${this.formatFileSize(file.size)}</span>
-                        <span class="file-pages">${file.pages || '?'} pages</span>
+        const legacyList = document.getElementById('uploadedFiles');
+        const newList = document.getElementById('filesList');
+
+        // Handle legacy layout
+        if (legacyList) {
+            if (this.uploadedFiles.length === 0) {
+                legacyList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-upload"></i>
+                        <p>No files uploaded yet</p>
                     </div>
-                </div>
-                <div class="file-actions">
-                    <button class="file-action preview-btn" title="Preview">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="file-action remove-btn" title="Remove">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            `;
-            
-            // Add event listeners
-            fileItem.querySelector('.preview-btn').addEventListener('click', () => {
-                this.previewFile(index);
-            });
-            
-            fileItem.querySelector('.remove-btn').addEventListener('click', () => {
-                this.removeFile(index);
-            });
-            
-            fileListElement.appendChild(fileItem);
-        });
+                `;
+            } else {
+                legacyList.innerHTML = '';
+                this.uploadedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-icon">
+                            <i class="fas fa-file-${this.getFileIcon(file.type)}"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-meta">
+                                <span class="file-type">${this.getFileTypeLabel(file.type)}</span>
+                                <span class="file-size">${this.formatFileSize(file.size)}</span>
+                                <span class="file-pages">${file.pages || '?'} pages</span>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-action preview-btn" title="Preview">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="file-action remove-btn" title="Remove">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+                    fileItem.querySelector('.preview-btn').addEventListener('click', () => this.previewFile(index));
+                    fileItem.querySelector('.remove-btn').addEventListener('click', () => this.removeFile(index));
+                    legacyList.appendChild(fileItem);
+                });
+            }
+        }
+
+        // Handle new layout
+        if (newList) {
+            const filesSection = document.getElementById('filesSection');
+            const mergeSection = document.getElementById('mergeSection');
+            if (this.uploadedFiles.length === 0) {
+                newList.innerHTML = '';
+                if (filesSection) filesSection.style.display = 'none';
+                if (mergeSection) mergeSection.style.display = 'none';
+            } else {
+                if (filesSection) filesSection.style.display = '';
+                if (mergeSection) mergeSection.style.display = '';
+                newList.innerHTML = '';
+                this.uploadedFiles.forEach((file, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'sortable-item d-flex align-items-center justify-content-between border rounded p-2 mb-2';
+                    row.dataset.index = index.toString();
+                    row.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-grip-vertical me-2 text-muted"></i>
+                            <i class="fas fa-file-${this.getFileIcon(file.type)} me-2 text-primary"></i>
+                            <div>
+                                <div class="fw-semibold">${file.name}</div>
+                                <div class="text-muted small">${this.getFileTypeLabel(file.type)} • ${this.formatFileSize(file.size)} • ${file.pages || '?'} pages</div>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary me-2 preview-btn"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-outline-danger remove-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    row.querySelector('.preview-btn').addEventListener('click', () => this.previewFile(index));
+                    row.querySelector('.remove-btn').addEventListener('click', () => this.removeFile(index));
+                    newList.appendChild(row);
+                });
+                // Re-init sortable each time to pick up new items
+                this.initializeDragAndDrop();
+            }
+        }
     }
     
     updateArrangementList() {
@@ -425,9 +472,11 @@ class DocumentMerger {
     
     updateFileOrderFromDOM() {
         const arrangementList = document.getElementById('arrangementList');
-        if (!arrangementList) return;
+        const filesList = document.getElementById('filesList');
+        const source = arrangementList || filesList;
+        if (!source) return;
         
-        const items = arrangementList.querySelectorAll('.arrangement-item');
+        const items = source.querySelectorAll('[data-index]');
         const newOrder = [];
         const newFiles = [];
         
@@ -437,7 +486,8 @@ class DocumentMerger {
             newFiles.push(this.uploadedFiles[oldIndex]);
             
             // Update the displayed number
-            item.querySelector('.item-number').textContent = (newIndex + 1).toString();
+            const numEl = item.querySelector('.item-number');
+            if (numEl) numEl.textContent = (newIndex + 1).toString();
         });
         
         this.uploadedFiles = newFiles;
@@ -457,132 +507,50 @@ class DocumentMerger {
 
     // Merge process methods
     startMergeProcess() {
-        // Validate required fields
-        const bookTitle = document.getElementById('outputName')?.value;
+        // Validate required fields (support both layouts)
+        const bookTitle = (document.getElementById('documentTitle')?.value || document.getElementById('outputName')?.value || '').trim();
         if (!bookTitle || bookTitle.trim() === '') {
             this.showToast('Please enter a book title', 'warning');
             return;
         }
-        
-        // Hide all sections
-        document.querySelectorAll('.merger-section').forEach(section => {
-            section.classList.add('hidden');
-        });
-        
-        // Show progress section
-        const progressSection = document.getElementById('progressSection');
-        if (progressSection) {
-            progressSection.classList.remove('hidden');
-        }
-        
-        // Reset progress indicators
-        document.querySelector('.progress-percentage').textContent = '0%';
-        
-        // Reset all progress steps
+        // Prepare options from settings (both layouts)
+        const includeToc = (document.getElementById('generateToc')?.checked ?? document.getElementById('includeToc')?.checked) !== false;
+        const pageNumbers = (document.getElementById('autoNumbering')?.checked ?? document.getElementById('pageNumbers')?.checked) === true;
+        const chapterBreaks = (document.getElementById('addPageBreaks')?.checked ?? document.getElementById('chapterBreaks')?.checked) !== false;
+        const pageSize = (document.getElementById('pageSize')?.value || 'a4');
+        const template = null; // could be extended later
+
+        // Progress UI (old layout) — no-op if missing
+        const pp = document.querySelector('.progress-percentage'); if (pp) pp.textContent = '0%';
         const progressSteps = document.querySelectorAll('.progress-step');
-        progressSteps.forEach((step, index) => {
-            step.classList.remove('active', 'completed');
-            const icon = step.querySelector('i');
-            const status = step.querySelector('.progress-step-status');
-            
-            if (index === 0) {
-                step.classList.add('active');
-                icon.className = 'fas fa-circle-notch fa-spin step-active';
-                status.textContent = 'In progress';
-            } else {
-                icon.className = 'fas fa-circle step-pending';
-                status.textContent = 'Waiting';
-            }
-        });
-        
-        // Simulate merge process
-        let progress = 0;
-        const progressPercentage = document.querySelector('.progress-percentage');
-        const progressCircle = document.querySelector('.progress-circle');
-        const progressFill = document.querySelector('.progress-fill');
-        
-        // Define progress thresholds for each step
-        const stepThresholds = [20, 40, 60, 80, 100];
-        
-        // Add subtle animation to make progress smoother
-        const progressInterval = setInterval(() => {
-            // Add random increments between 1-4 to make progress appear more realistic
-            const increment = Math.floor(Math.random() * 4) + 1;
-            progress = Math.min(progress + increment, 100);
-            
-            // Update progress percentage display with a fade effect
-            if (progressPercentage) {
-                progressPercentage.style.opacity = '0.5';
-                setTimeout(() => {
-                    progressPercentage.textContent = `${progress}%`;
-                    progressPercentage.style.opacity = '1';
-                }, 100);
-            }
-            
-            // Update visual progress indicators with smooth transitions
-            progressCircle.style.background = `conic-gradient(var(--primary-color) ${progress * 3.6}deg, var(--glass-bg) 0deg)`;
-            
-            if (progressFill) {
-                progressFill.style.width = `${progress}%`;
-            }
-            
-            // Handle step transitions
-            stepThresholds.forEach((threshold, index) => {
-                if (progress >= threshold && index < progressSteps.length) {
-                    // Complete current step
-                    const currentStep = progressSteps[index];
-                    if (!currentStep.classList.contains('completed')) {
-                        currentStep.classList.remove('active');
-                        currentStep.classList.add('completed');
-                        currentStep.querySelector('i').className = 'fas fa-check-circle step-complete';
-                        currentStep.querySelector('.progress-step-status').textContent = 'Completed';
-                    }
-                    
-                    // Activate next step if available
-                    if (index + 1 < progressSteps.length && progress < 100) {
-                        const nextStep = progressSteps[index + 1];
-                        nextStep.classList.add('active');
-                        nextStep.querySelector('i').className = 'fas fa-circle-notch fa-spin step-active';
-                        nextStep.querySelector('.progress-step-status').textContent = 'In progress';
-                    }
+        if (progressSteps && progressSteps.length) {
+            progressSteps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                const icon = step.querySelector('i');
+                const status = step.querySelector('.progress-step-status');
+                if (index === 0) {
+                    step.classList.add('active');
+                    if (icon) icon.className = 'fas fa-circle-notch fa-spin step-active';
+                    if (status) status.textContent = 'In progress';
+                } else {
+                    if (icon) icon.className = 'fas fa-circle step-pending';
+                    if (status) status.textContent = 'Waiting';
                 }
             });
-            
-            if (progress >= 100) {
-                clearInterval(progressInterval);
-                
-                // Mark final step as completed
-                const finalStep = progressSteps[progressSteps.length - 1];
-                finalStep.classList.remove('active');
-                finalStep.classList.add('completed');
-                finalStep.querySelector('i').className = 'fas fa-check-circle step-complete';
-                finalStep.querySelector('.progress-step-status').textContent = 'Completed';
-                
-                // Set book title and stats in the download section
-                document.getElementById('finalBookTitle').textContent = bookTitle || 'Your Merged Book';
-                document.getElementById('totalPages').textContent = `${this.calculateTotalPages()} pages`;
-                document.getElementById('totalChapters').textContent = `${this.uploadedFiles.length} chapters`;
-                document.getElementById('fileSize').textContent = `${this.calculateTotalSize()}`;
-                
-                // Save to recent merges
-                this.addToRecentMerges({
-                    id: Date.now(),
-                    title: bookTitle || 'Merged Document',
-                    pages: this.calculateTotalPages(),
-                    chapters: this.uploadedFiles.length,
-                    size: this.calculateTotalSize(),
-                    date: new Date()
-                });
-                
-                // Show success notification
-                this.showToast('Document successfully merged!', 'success');
-                
-                // Show download section after a short delay with fade effect
-                setTimeout(() => {
-                    this.goToStep(4);
-                }, 1200);
-            }
-        }, 80);
+        }
+
+        // Sidebar steps (new layout)
+        this.setSidebarStepComplete(2); // configured
+        this.setSidebarActive(3);
+        this.setMergeStatus('Merging…', false);
+        
+        // Begin real merge with backend
+        this.runMergeRequest({ includeToc, pageNumbers, chapterBreaks, pageSize, template, title: bookTitle }).catch(err => {
+            console.error(err);
+            this.showToast(`Merge failed: ${err.message || err}`, 'error');
+            // fallback: return to settings
+            this.setMergeStatus('Failed', false);
+        });
     }
     
     calculateTotalPages() {
@@ -597,19 +565,26 @@ class DocumentMerger {
     }
     
     addToRecentMerges(mergeData) {
-        // Add to recent merges list
+        // Add to recent merges list (most recent first)
         this.recentMerges.unshift(mergeData);
-        
         // Keep only latest 10 merges
         if (this.recentMerges.length > 10) {
-            this.recentMerges.pop();
+            this.recentMerges.length = 10;
         }
-        
+        // Persist metadata only
+        try {
+            const toSave = this.recentMerges.map(m => ({
+                id: m.id,
+                title: m.title,
+                pages: m.pages,
+                chapters: m.chapters,
+                size: m.size,
+                date: m.date instanceof Date ? m.date.toISOString() : m.date
+            }));
+            localStorage.setItem('ff_recent_merges', JSON.stringify(toSave));
+        } catch {}
         // Update UI
         this.updateRecentMerges();
-        
-        // Save to local storage (in a real app)
-        // localStorage.setItem('recentMerges', JSON.stringify(this.recentMerges));
     }
     
     updateRecentMerges() {
@@ -663,78 +638,64 @@ class DocumentMerger {
             `;
             
             // Add event listeners for the buttons
-            mergeItem.querySelector('.download-btn').addEventListener('click', () => {
-                this.showToast(`Downloading "${merge.title}"...`, 'info');
-            });
-            
-            mergeItem.querySelector('.view-btn').addEventListener('click', () => {
-                this.showToast(`Opening preview for "${merge.title}"...`, 'info');
-            });
+            const dlBtn = mergeItem.querySelector('.download-btn');
+            const viewBtn = mergeItem.querySelector('.view-btn');
+            if (this.lastMergedBlob && merge.id === this.lastMergedId) {
+                dlBtn.addEventListener('click', () => this.downloadMergedDocument());
+                viewBtn.addEventListener('click', () => this.previewMergedDocument());
+            } else {
+                dlBtn.addEventListener('click', () => this.showToast('This file is from a previous session and is not cached for download.', 'info'));
+                viewBtn.addEventListener('click', () => this.showToast('This preview is not available in this session.', 'info'));
+            }
             
             mergesGrid.appendChild(mergeItem);
         });
     }
     
     loadRecentMerges() {
-        // In a real app, would load from localStorage or server
-        // For demo, create some sample merges
-        this.recentMerges = [
-            {
-                id: Date.now() - 86400000, // 1 day ago
-                title: "Annual Report 2023",
-                pages: 42,
-                chapters: 6,
-                size: "3.2 MB",
-                date: new Date(Date.now() - 86400000)
-            },
-            {
-                id: Date.now() - 172800000, // 2 days ago
-                title: "Product Specifications",
-                pages: 18,
-                chapters: 3,
-                size: "1.5 MB",
-                date: new Date(Date.now() - 172800000)
-            },
-            {
-                id: Date.now() - 259200000, // 3 days ago
-                title: "Research Paper Collection",
-                pages: 67,
-                chapters: 8,
-                size: "5.7 MB",
-                date: new Date(Date.now() - 259200000)
-            },
-            {
-                id: Date.now() - 345600000, // 4 days ago
-                title: "Marketing Strategy",
-                pages: 23,
-                chapters: 4,
-                size: "2.1 MB",
-                date: new Date(Date.now() - 345600000)
+        // Load from localStorage if available; otherwise empty
+        try {
+            const raw = localStorage.getItem('ff_recent_merges');
+            if (raw) {
+                const arr = JSON.parse(raw);
+                this.recentMerges = (Array.isArray(arr) ? arr : []).map(m => ({
+                    ...m,
+                    date: m.date ? new Date(m.date) : new Date()
+                }));
+            } else {
+                this.recentMerges = [];
             }
-        ];
-        
+        } catch {
+            this.recentMerges = [];
+        }
         this.updateRecentMerges();
     }
     
     downloadMergedDocument() {
-        // In a real app, would generate and download the merged document
-        const bookTitle = document.getElementById('finalBookTitle').textContent;
-        this.showToast(`Downloading "${bookTitle}"...`, 'success');
-        
-        // Simulate download by creating a dummy PDF link
-        setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = '#'; // Would be a real file URL
-            link.download = `${bookTitle.replace(/\s+/g, '_')}.pdf`;
-            document.body.appendChild(link);
-            // link.click(); // Uncomment in real app
-            document.body.removeChild(link);
-        }, 1000);
+        const bookTitle = document.getElementById('finalBookTitle').textContent || 'Merged_Document';
+        if (!this.lastMergedBlob) {
+            this.showToast('No merged document available yet', 'warning');
+            return;
+        }
+        const url = this.lastMergedUrl || URL.createObjectURL(this.lastMergedBlob);
+        this.lastMergedUrl = url;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${bookTitle.replace(/\s+/g, '_')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
     
     previewMergedDocument() {
-        const bookTitle = document.getElementById('finalBookTitle').textContent;
-        this.showToast(`Opening preview for "${bookTitle}"... (Feature coming soon)`, 'info');
+        const bookTitle = document.getElementById('finalBookTitle').textContent || 'Merged_Document';
+        if (!this.lastMergedBlob) {
+            this.showToast('No merged document to preview', 'warning');
+            return;
+        }
+        const url = this.lastMergedUrl || URL.createObjectURL(this.lastMergedBlob);
+        this.lastMergedUrl = url;
+        window.open(url, '_blank');
     }
     
     shareMergedDocument() {
@@ -826,3 +787,211 @@ class DocumentMerger {
 
 // Initialize the document merger
 const mergerDashboard = new DocumentMerger();
+
+// Backend helpers wired into the class prototype to keep layout unchanged
+DocumentMerger.prototype.refreshFileStats = async function(justAdded) {
+    const filesToInspect = (justAdded && justAdded.length ? justAdded : this.uploadedFiles);
+    if (!filesToInspect.length) return;
+    const form = new FormData();
+    for (const fd of filesToInspect) {
+        form.append('files', fd.file, fd.name);
+    }
+    const resp = await fetch(`${this.apiBase}/merge/inspect`, { method: 'POST', body: form });
+    if (!resp.ok) return;
+    const json = await resp.json().catch(() => null);
+    if (!json || !Array.isArray(json.files)) return;
+    // Update local entries by name match
+    for (const info of json.files) {
+        const idx = this.uploadedFiles.findIndex(f => f.name === info.name);
+        if (idx !== -1) {
+            if (typeof info.pages === 'number') this.uploadedFiles[idx].pages = info.pages;
+            if (typeof info.size === 'number') this.uploadedFiles[idx].size = info.size;
+        }
+    }
+    this.updateFileList();
+};
+
+DocumentMerger.prototype.updateProgressUI = function(progress) {
+    const pct = Math.max(0, Math.min(100, progress|0));
+    const progressPercentage = document.querySelector('.progress-percentage');
+    const progressCircle = document.querySelector('.progress-circle');
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressPercentage) progressPercentage.textContent = `${pct}%`;
+    if (progressCircle) progressCircle.style.background = `conic-gradient(var(--primary-color) ${pct * 3.6}deg, var(--glass-bg) 0deg)`;
+    if (progressFill) progressFill.style.width = `${pct}%`;
+    // Steps mapping
+    const thresholds = [20, 40, 60, 80, 100];
+    const steps = document.querySelectorAll('.progress-step');
+    thresholds.forEach((t, i) => {
+        if (!steps[i]) return;
+        const step = steps[i];
+        if (pct >= t) {
+            step.classList.add('completed');
+            step.classList.remove('active');
+            const icon = step.querySelector('i');
+            const status = step.querySelector('.progress-step-status');
+            if (icon) icon.className = 'fas fa-check-circle step-complete';
+            if (status) status.textContent = 'Completed';
+            if (steps[i+1] && pct < 100) {
+                steps[i+1].classList.add('active');
+                const nicon = steps[i+1].querySelector('i');
+                const nstatus = steps[i+1].querySelector('.progress-step-status');
+                if (nicon) nicon.className = 'fas fa-circle-notch fa-spin step-active';
+                if (nstatus) nstatus.textContent = 'In progress';
+            }
+        }
+    });
+};
+
+DocumentMerger.prototype.runMergeRequest = async function({ includeToc, pageNumbers, chapterBreaks, pageSize, template, title }) {
+    // Build multipart form
+    const form = new FormData();
+    for (const f of this.uploadedFiles) {
+        form.append('files', f.file, f.name);
+    }
+    form.append('page_size', pageSize || 'a4');
+    form.append('generate_toc', includeToc ? 'true' : 'false');
+    form.append('add_page_breaks', chapterBreaks ? 'true' : 'false');
+    form.append('page_numbers', pageNumbers ? 'true' : 'false');
+    if (template) form.append('template', template);
+
+    // Stage 1: Validating
+    this.updateProgressUI(10);
+    await new Promise(r => setTimeout(r, 200));
+    this.updateProgressUI(20);
+    await new Promise(r => setTimeout(r, 200));
+    // Stage 2: Converting formats
+    this.updateProgressUI(40);
+    // Stage 3: Merging content (animate while waiting for server)
+    let animProgress = 40;
+    const anim = setInterval(() => {
+        animProgress = Math.min(animProgress + 3, 70);
+        this.updateProgressUI(animProgress);
+    }, 250);
+    const resp = await fetch(`${this.apiBase}/merge/generate-toc-from-pdf`, { method: 'POST', body: form });
+    clearInterval(anim);
+    if (!resp.ok) {
+        let msg = 'Merge failed';
+        try { const j = await resp.json(); msg = j.detail || msg; } catch {}
+        throw new Error(msg);
+    }
+    // Stage 4: Generating TOC
+    this.updateProgressUI(85);
+    // Read headers for metadata
+    const dupHeader = resp.headers.get('X-Duplicates-Skipped');
+    if (dupHeader) {
+        const count = dupHeader.split(';').filter(Boolean).length;
+        if (count > 0) this.showToast(`Skipped ${count} duplicate item(s)`, 'info');
+    }
+    // Get PDF blob
+    const blob = await resp.blob();
+    this.lastMergedBlob = blob;
+    if (this.lastMergedUrl) {
+        try { URL.revokeObjectURL(this.lastMergedUrl); } catch {}
+        this.lastMergedUrl = null;
+    }
+    // Stage 5: Finalizing
+    this.updateProgressUI(95);
+    await new Promise(r => setTimeout(r, 250));
+    this.updateProgressUI(100);
+
+    // Fill download section stats
+    document.getElementById('finalBookTitle').textContent = title || 'Your Merged Book';
+    // Try to open PDF to count pages for accurate stats; fallback to estimates
+    try {
+        // Counting PDF pages on client is non-trivial without a PDF lib; fallback to estimate
+        document.getElementById('totalPages').textContent = `${this.calculateTotalPages()} pages`;
+    } catch {
+        document.getElementById('totalPages').textContent = `${this.calculateTotalPages()} pages`;
+    }
+    document.getElementById('totalChapters').textContent = `${this.uploadedFiles.length} chapters`;
+    const sizeMB = (blob.size / (1024*1024)).toFixed(2) + ' MB';
+    document.getElementById('fileSize').textContent = sizeMB;
+
+    // Add to recent merges dynamically
+    const mergeId = Date.now();
+    this.lastMergedId = mergeId;
+    this.addToRecentMerges({
+        id: mergeId,
+        title: title || 'Merged Document',
+        pages: this.calculateTotalPages(),
+        chapters: this.uploadedFiles.length,
+        size: sizeMB,
+        date: new Date()
+    });
+
+    // Render an embedded PDF viewer in the download section like admin page
+    try { this.renderMergedPdfPreview(title || 'Your Merged Book'); } catch {}
+
+    // Move to download step
+    this.goToStep(4);
+    this.setSidebarStepComplete(3);
+    this.setSidebarStepComplete(4);
+    this.setMergeStatus('Complete', true);
+    this.showToast('Document successfully merged!', 'success');
+};
+
+// Insert an iframe PDF viewer into the download section result preview
+DocumentMerger.prototype.renderMergedPdfPreview = function(title) {
+    if (!this.lastMergedBlob) return;
+    const container = document.querySelector('.download-section .result-preview');
+    if (!container) return;
+    // Revoke previous URL if any
+    if (this.lastMergedUrl) {
+        try { URL.revokeObjectURL(this.lastMergedUrl); } catch {}
+        this.lastMergedUrl = null;
+    }
+    const objectUrl = URL.createObjectURL(this.lastMergedBlob);
+    this.lastMergedUrl = objectUrl;
+
+    // Build viewer similar to admin implementation
+    container.innerHTML = '';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'mb-3';
+    titleEl.innerHTML = `<h4 class="mb-1">${(title || 'Merged Document')}</h4><small class="text-muted">Preview of generated PDF</small>`;
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.minHeight = '600px';
+    iframe.style.border = '1px solid #e9ecef';
+    iframe.src = objectUrl;
+    container.appendChild(titleEl);
+    container.appendChild(iframe);
+};
+
+// Sidebar helpers (new layout)
+DocumentMerger.prototype.setSidebarStepComplete = function(stepNum) {
+    const el = document.getElementById(`step${stepNum}`);
+    if (!el) return;
+    const check = el.querySelector('.fa-check');
+    if (check) check.style.display = '';
+};
+DocumentMerger.prototype.setSidebarActive = function(stepNum) {
+    // Could highlight the active step; for now, ensure previous checks shown
+    const el = document.getElementById(`step${stepNum}`);
+    if (!el) return;
+};
+DocumentMerger.prototype.updateSidebarSteps = function(step) {
+    // Map old steps to new sidebar (best-effort)
+    for (let i = 1; i <= 4; i++) {
+        if (i < step) this.setSidebarStepComplete(i);
+    }
+};
+DocumentMerger.prototype.setMergeStatus = function(text, success) {
+    const el = document.getElementById('mergeStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.toggle('text-success', !!success);
+    el.classList.toggle('text-danger', text?.toLowerCase().includes('fail'));
+};
+
+// Global wrappers for new layout inline handlers
+// Namespaced wrappers to avoid collisions with any admin/global scripts
+window.ffStartMerge = () => { try { mergerDashboard.startMergeProcess(); } catch (e) { console.error(e); } };
+window.ffResetMerger = () => { try { mergerDashboard.startOver(); } catch (e) { console.error(e); } };
+window.ffAddMoreFiles = () => { try { document.getElementById('fileInput')?.click(); } catch (e) { console.error(e); } };
+window.ffClearAllFiles = () => { try { mergerDashboard.clearAllFiles(); } catch (e) { console.error(e); } };
+window.ffSelectTemplate = (name) => { mergerDashboard.showToast(`Template \"${name}\" selected (not applied to backend)`, 'info'); };
+window.ffExportDocument = (fmt) => { if (fmt === 'pdf') return mergerDashboard.downloadMergedDocument(); mergerDashboard.showToast(`Export to ${fmt.toUpperCase()} is not implemented yet`, 'info'); };
+window.ffSaveCurrentPreset = () => mergerDashboard.showToast('Preset saved (demo)', 'success');
+window.ffShowPresetModal = () => mergerDashboard.showToast('Preset modal coming soon', 'info');
+window.ffShowKeyboardShortcuts = () => mergerDashboard.showToast('Shortcuts: Del to remove, Enter to merge', 'info');
