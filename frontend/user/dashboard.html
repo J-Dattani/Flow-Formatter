@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - FormatFlow</title>
+
+    <!-- External Dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+
+</head>
+
+<body class="dashboard-page">
+    <!-- Glassmorphism Background -->
+    <div class="glass-background"></div>
+
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="landing.html">
+                    <i class="fas fa-file-alt brand-icon"></i>
+                    <span class="brand-text">FormatFlow</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="submitted.html" class="nav-link">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submitted</span>
+                </a>
+                <a href="merger.html" class="nav-link">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Merger</span>
+                </a>
+                <a href="contact.html" class="nav-link">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="container-fluid">
+            <!-- Welcome Header -->
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <h1 class="welcome-title">Welcome back, <span class="user-name">John Doe</span></h1>
+                    <p class="welcome-subtitle">Manage your books, track submissions, and collaborate with ease</p>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-number">12</h3>
+                                <p class="stat-label">Active Books</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-number">8</h3>
+                                <p class="stat-label">Published</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-number">24</h3>
+                                <p class="stat-label">Contributors</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-number">5</h3>
+                                <p class="stat-label">Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filter & Search -->
+            <section class="filter-section">
+                <div class="filter-container">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" placeholder="Search books..." class="search-input">
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fas fa-th"></i>
+                            All Books
+                        </button>
+                        <button class="filter-btn" data-filter="published">
+                            <i class="fas fa-check-circle"></i>
+                            Published
+                        </button>
+                        <button class="filter-btn" data-filter="draft">
+                            <i class="fas fa-edit"></i>
+                            Draft
+                        </button>
+                        <button class="filter-btn" data-filter="collaboration">
+                            <i class="fas fa-users"></i>
+                            Collaboration
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Books Grid -->
+            <section class="books-section">
+                <div class="books-grid">
+                    <!-- Book Card 1 - Published -->
+                    <div class="book-card published" data-book-id="1">
+                        <div class="book-header">
+                            <div class="book-status">
+                                <span class="status-badge published">
+                                    <i class="fas fa-check-circle"></i>
+                                    Published
+                                </span>
+                            </div>
+                            <div class="book-menu">
+                                <button class="menu-btn" aria-label="More options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="menu-dropdown">
+                                    <button class="menu-item"
+                                        onclick="dashboard.viewBookDetails(1); event.preventDefault();">
+                                        <i class="fas fa-eye"></i>
+                                        <span>View Details</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit Book</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span>Share</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-download"></i>
+                                        <span>Download</span>
+                                    </button>
+                                    <div class="menu-separator"></div>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-copy"></i>
+                                        <span>Duplicate</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-archive"></i>
+                                        <span>Archive</span>
+                                    </button>
+                                    <div class="menu-separator"></div>
+                                    <button class="menu-item danger" onclick="event.preventDefault();">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span>Delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-cover">
+                            <div class="book-thumbnail">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                        </div>
+
+                        <div class="book-content">
+                            <h3 class="book-title">Advanced JavaScript Techniques</h3>
+                            <p class="book-description">A comprehensive guide to modern JavaScript patterns and best
+                                practices</p>
+
+                            <div class="book-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>12 Chapters</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>5 Authors</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Published Jan 2024</span>
+                                </div>
+                            </div>
+
+                            <div class="book-progress">
+                                <div class="progress-info">
+                                    <span class="progress-label">Completion</span>
+                                    <span class="progress-value">100%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+
+                            <div class="book-contributors">
+                                <div class="contributors-label">Contributors:</div>
+                                <div class="contributors-list">
+                                    <div class="contributor-avatar" title="Sarah Johnson">SJ</div>
+                                    <div class="contributor-avatar" title="Mike Chen">MC</div>
+                                    <div class="contributor-avatar" title="Lisa Wang">LW</div>
+                                    <div class="contributor-avatar more">+2</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-actions">
+                            <button class="btn-primary" onclick="dashboard.viewBookDetails(1)">
+                                <i class="fas fa-eye"></i>
+                                View Book
+                            </button>
+                            <button class="btn-secondary" onclick="dashboard.handleShare(1)">
+                                <i class="fas fa-share"></i>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Book Card 2 - Draft -->
+                    <div class="book-card draft" data-book-id="2">
+                        <div class="book-header">
+                            <div class="book-status">
+                                <span class="status-badge draft">
+                                    <i class="fas fa-edit"></i>
+                                    Draft
+                                </span>
+                            </div>
+                            <div class="book-menu">
+                                <button class="menu-btn" aria-label="More options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="menu-dropdown">
+                                    <button class="menu-item"
+                                        onclick="dashboard.viewBookDetails(2); event.preventDefault();">
+                                        <i class="fas fa-eye"></i>
+                                        <span>View Details</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit Book</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span>Share</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-download"></i>
+                                        <span>Download</span>
+                                    </button>
+                                    <div class="menu-separator"></div>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-copy"></i>
+                                        <span>Duplicate</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-archive"></i>
+                                        <span>Archive</span>
+                                    </button>
+                                    <div class="menu-separator"></div>
+                                    <button class="menu-item danger" onclick="event.preventDefault();">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span>Delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-cover">
+                            <div class="book-thumbnail">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        </div>
+
+                        <div class="book-content">
+                            <h3 class="book-title">React Best Practices</h3>
+                            <p class="book-description">Modern React development patterns and performance optimization
+                            </p>
+
+                            <div class="book-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>8/15 Chapters</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>3 Authors</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>In Progress</span>
+                                </div>
+                            </div>
+
+                            <div class="book-progress">
+                                <div class="progress-info">
+                                    <span class="progress-label">Completion</span>
+                                    <span class="progress-value">65%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 65%"></div>
+                                </div>
+                            </div>
+
+                            <div class="book-contributors">
+                                <div class="contributors-label">Contributors:</div>
+                                <div class="contributors-list">
+                                    <div class="contributor-avatar" title="Alex Rodriguez">AR</div>
+                                    <div class="contributor-avatar" title="Emma Davis">ED</div>
+                                    <div class="contributor-avatar" title="Tom Wilson">TW</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-actions">
+                            <button class="btn-primary">
+                                <i class="fas fa-edit"></i>
+                                Continue Editing
+                            </button>
+                            <button class="btn-secondary">
+                                <i class="fas fa-paper-plane"></i>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Book Card 3 - Collaboration -->
+                    <div class="book-card collaboration" data-book-id="3">
+                        <div class="book-header">
+                            <div class="book-status">
+                                <span class="status-badge collaboration">
+                                    <i class="fas fa-users"></i>
+                                    Collaboration
+                                </span>
+                            </div>
+                            <div class="book-menu">
+                                <button class="menu-btn" aria-label="More options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="menu-dropdown">
+                                    <button class="menu-item"
+                                        onclick="dashboard.viewBookDetails(3); event.preventDefault();">
+                                        <i class="fas fa-eye"></i>
+                                        <span>View Details</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit Book</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span>Share</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-download"></i>
+                                        <span>Download</span>
+                                    </button>
+                                    <div class="menu-separator"></div>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-copy"></i>
+                                        <span>Duplicate</span>
+                                    </button>
+                                    <button class="menu-item" onclick="event.preventDefault();">
+                                        <i class="fas fa-archive"></i>
+                                        <span>Archive</span>
+                                    </button>
+                                    <div class="menu-separator"></div>
+                                    <button class="menu-item danger" onclick="event.preventDefault();">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span>Delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-cover">
+                            <div class="book-thumbnail">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+
+                        <div class="book-content">
+                            <h3 class="book-title">Python Data Science Handbook</h3>
+                            <p class="book-description">Comprehensive guide to data analysis and machine learning with
+                                Python</p>
+
+                            <div class="book-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>5/20 Chapters</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>8 Authors</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>2 weeks left</span>
+                                </div>
+                            </div>
+
+                            <div class="book-progress">
+                                <div class="progress-info">
+                                    <span class="progress-label">Completion</span>
+                                    <span class="progress-value">25%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 25%"></div>
+                                </div>
+                            </div>
+
+                            <div class="book-contributors">
+                                <div class="contributors-label">Contributors:</div>
+                                <div class="contributors-list">
+                                    <div class="contributor-avatar" title="Data Scientist 1">DS</div>
+                                    <div class="contributor-avatar" title="ML Engineer">ML</div>
+                                    <div class="contributor-avatar" title="Research Lead">RL</div>
+                                    <div class="contributor-avatar more">+5</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-actions">
+                            <button class="btn-primary">
+                                <i class="fas fa-users"></i>
+                                Join Collaboration
+                            </button>
+                            <button class="btn-secondary">
+                                <i class="fas fa-comments"></i>
+                                Discuss
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add more book cards as needed -->
+                    <div class="book-card-add">
+                        <div class="add-content">
+                            <div class="add-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <h3 class="add-title">Create New Book</h3>
+                            <p class="add-description">Start a new book project or collaboration</p>
+                            <button class="btn-add">
+                                <i class="fas fa-plus"></i>
+                                Create Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Book Details Modal -->
+    <div class="modal-overlay" id="bookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Book Details</h2>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="book-details">
+                    <div class="detail-section">
+                        <h3>Book Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Title:</label>
+                                <span id="modalBookTitle">Advanced JavaScript Techniques</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Status:</label>
+                                <span id="modalBookStatus" class="status-badge published">Published</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Total Chapters:</label>
+                                <span id="modalTotalChapters">12</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Completed:</label>
+                                <span id="modalCompletedChapters">12</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Publishers & Contributors</h3>
+                        <div class="publishers-list" id="modalPublishers">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Chapter Status</h3>
+                        <div class="chapters-list" id="modalChapters">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary modal-btn">Close</button>
+                <button class="btn-primary modal-btn">Edit Book</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+<!-- 
+    <script>
+         document.addEventListener("DOMContentLoaded", () => {
+            includeHTML();
+        });
+
+        function includeHTML() {
+            const elements = document.querySelectorAll("[data-include]");
+
+            elements.forEach(el => {
+                const file = el.getAttribute("data-include");
+
+                fetch(file)
+                    .then(response => {
+                        if (!response.ok) throw new Error("File not found: " + file);
+                        return response.text();
+                    })
+                    .then(data => {
+                        el.innerHTML = data;
+                    })
+                    .catch(err => {
+                        el.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    });
+            });
+        }
+    </script> -->
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

@@ -4,11 +4,12 @@
  */
 
 const API_CONFIG = {
-    PROTOTYPE_MODE: false, // Real Supabase auth is now enforced
-    BASE_URL: 'http://localhost:5000/api',
+    PROTOTYPE_MODE: false, // Set true to force pure mock mode
+    BASE_URL: 'http://127.0.0.1:8000/api',
     ENDPOINTS: {
         LOGIN: '/auth/login',
         LOGOUT: '/auth/logout',
+        SIGNUP: '/auth/signup',
         DASHBOARD_STATS: '/dashboard/stats',
         RECENT_DOCS: '/dashboard/recent-documents',
         TEMPLATES: '/templates',
@@ -21,12 +22,10 @@ const API_CONFIG = {
 // Lightweight localStorage fallback for templates to preserve prior UX when not authenticated
 const LocalTemplateStore = (() => {
     const KEY = 'templates_store_v1';
-    const read = () => {
-        try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; }
-    };
+    const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
     const write = (arr) => { localStorage.setItem(KEY, JSON.stringify(arr)); };
     const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
     const now = () => new Date().toISOString();
@@ -72,225 +71,120 @@ const LocalTemplateStore = (() => {
     };
 })();
 
-/**
- * Mock data for prototype
- */
+// Minimal mock data to satisfy references when prototype mode is off
 const MOCK_DATA = {
-    users: [
-        { id: 1, email: 'admin@example.com', password: 'admin123', name: 'Admin User', role: 'admin' },
-        { id: 2, email: 'demo@example.com', password: 'demo123', name: 'Demo User', role: 'admin' }
-    ],
-    dashboardStats: {
-        templates: 24,
-        authors: 156,
-        pendingSubmissions: 12,
-        generatedDocuments: 89
-    },
-    authors: [
-        {
-            id: 'author_1',
-            name: 'John Smith',
-            email: 'john.smith@example.com',
-            role: 'content_writer',
-            department: 'Marketing',
-            status: 'active',
-            bio: 'Experienced content writer with 5+ years in digital marketing and technical writing.',
-            documents_count: 23,
-            pending_count: 3,
-            completed_count: 20,
-            created_at: '2024-01-15T10:30:00Z',
-            last_active: '2024-10-07T14:20:00Z'
-        },
-        {
-            id: 'author_2',
-            name: 'Alice Davis',
-            email: 'alice.davis@example.com',
-            role: 'editor',
-            department: 'Editorial',
-            status: 'active',
-            bio: 'Senior editor specializing in technical documentation and research papers.',
-            documents_count: 45,
-            pending_count: 2,
-            completed_count: 43,
-            created_at: '2024-02-20T09:15:00Z',
-            last_active: '2024-10-08T11:45:00Z'
-        },
-        {
-            id: 'author_3',
-            name: 'Michael Johnson',
-            email: 'michael.johnson@example.com',
-            role: 'reviewer',
-            department: 'Quality Assurance',
-            status: 'pending',
-            bio: 'Quality assurance specialist with expertise in document review and compliance.',
-            documents_count: 12,
-            pending_count: 1,
-            completed_count: 11,
-            created_at: '2024-03-10T16:45:00Z',
-            last_active: '2024-10-06T09:30:00Z'
-        },
-        {
-            id: 'author_4',
-            name: 'Sarah Wilson',
-            email: 'sarah.wilson@example.com',
-            role: 'contributor',
-            department: 'Research',
-            status: 'active',
-            bio: 'Research contributor focusing on data analysis and report generation.',
-            documents_count: 34,
-            pending_count: 5,
-            completed_count: 29,
-            created_at: '2024-01-25T13:20:00Z',
-            last_active: '2024-10-08T16:10:00Z'
-        }
-    ],
-    submissions: [
-        {
-            id: 'sub_1',
-            title: 'Annual Marketing Report 2024',
-            description: 'Comprehensive analysis of marketing performance and strategies for 2024',
-            author_name: 'John Smith',
-            author_email: 'john.smith@example.com',
-            template_id: 'template_1',
-            template_name: 'Business Report',
-            status: 'approved',
-            created_at: '2024-10-01T10:30:00Z',
-            word_count: 2450,
-            page_count: 8,
-            version: '1.2',
-            download_count: 15,
-            content: [
-                { type: 'title', content: 'Annual Marketing Report 2024' },
-                { type: 'paragraph', content: 'This report provides a comprehensive analysis of our marketing performance throughout 2024, including key metrics, campaign results, and strategic recommendations for the upcoming year.' },
-                { type: 'subtitle', content: 'Executive Summary' },
-                { type: 'paragraph', content: 'Our marketing efforts in 2024 showed significant improvement with a 35% increase in lead generation and 28% growth in conversion rates.' }
-            ]
-        },
-        {
-            id: 'sub_2',
-            title: 'Product Development Proposal',
-            description: 'Proposal for new product development initiative with market analysis',
-            author_name: 'Alice Davis',
-            author_email: 'alice.davis@example.com',
-            template_id: 'template_2',
-            template_name: 'Project Proposal',
-            status: 'pending',
-            created_at: '2024-10-03T14:45:00Z',
-            word_count: 1890,
-            page_count: 6,
-            version: '1.0',
-            download_count: 3,
-            content: [
-                { type: 'title', content: 'Product Development Proposal' },
-                { type: 'paragraph', content: 'This proposal outlines the development plan for our new product line, including market research, technical requirements, and timeline.' }
-            ]
-        },
-        {
-            id: 'sub_3',
-            title: 'Research Findings Summary',
-            description: 'Summary of Q3 research findings and recommendations',
-            author_name: 'Sarah Wilson',
-            author_email: 'sarah.wilson@example.com',
-            template_id: 'template_3',
-            template_name: 'Research Report',
-            status: 'rejected',
-            created_at: '2024-09-28T11:20:00Z',
-            word_count: 3200,
-            page_count: 12,
-            version: '2.1',
-            download_count: 8,
-            content: [
-                { type: 'title', content: 'Q3 Research Findings Summary' },
-                { type: 'paragraph', content: 'Our Q3 research focused on customer behavior analysis and market trend identification.' }
-            ]
-        }
-    ],
-    settings: {
-        general: {
-            systemName: 'Smart Document Merger',
-            systemLanguage: 'en',
-            timezone: 'UTC',
-            dateFormat: 'MM/DD/YYYY',
-            autoSave: true,
-            emailNotifications: true,
-            publicTemplates: false,
-            analyticsTracking: true
-        },
-        profile: {
-            firstName: 'Admin',
-            lastName: 'User',
-            email: 'admin@example.com',
-            phone: '+1 (555) 123-4567',
-            department: 'Administration',
-            bio: 'System administrator responsible for managing the Smart Document Merger platform.'
-        },
-        templates: {
-            defaultTemplate: 'basic',
-            maxFileSize: 10,
-            templateExpiry: 365,
-            versionControl: true,
-            templateSharing: true,
-            autoBackup: true,
-            templateComments: false,
-            allowedFormats: {
-                pdf: true,
-                docx: true,
-                html: false
+    users: [],
+    dashboardStats: { templates: 0, authors: 0, pendingSubmissions: 0, generatedDocuments: 0 },
+    recentSubmissions: [],
+    authors: [],
+    settings: {}
+};
+
+/**
+ * TEMPLATE API
+ */
+const TemplateAPI = {
+    getAll: async () => {
+        try {
+            try {
+                const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEMPLATES}`);
+                const j = await resp.json().catch(() => ({}));
+                if (resp.ok && j && j.success && Array.isArray(j.data)) return { success: true, data: j.data };
+            } catch (_) {}
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (supa) {
+                const { data, error } = await supa
+                    .from('templates')
+                    .select('id, name, category, updated_at, metadata')
+                    .order('updated_at', { ascending: false });
+                if (!error && Array.isArray(data)) return { success: true, data };
             }
-        },
-        notifications: {
-            newSubmission: true,
-            statusChanges: true,
-            newUsers: false,
-            systemAlerts: true,
-            weeklyReports: false,
-            marketingEmails: false,
-            browserNotifications: true,
-            soundNotifications: false,
-            notificationFrequency: 'instant'
-        },
-        security: {
-            enable2FA: false,
-            sessionTimeout: 30,
-            rememberDevice: false,
-            loginAlerts: true,
-            suspiciousActivity: true
-        },
-        integrations: {
-            googleDrive: false,
-            dropbox: false,
-            slack: true,
-            microsoft365: false
-        },
-        backup: {
-            autoBackups: true,
-            backupFrequency: 'weekly',
-            backupRetention: 30
+            return LocalTemplateStore.getAll();
+        } catch (e) {
+            return LocalTemplateStore.getAll();
         }
     },
-    recentSubmissions: [
-        {
-            id: 1,
-            authorName: 'John Smith',
-            templateName: 'Annual Report 2024',
-            status: 'completed',
-            submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-        },
-        {
-            id: 2,
-            authorName: 'Alice Davis',
-            templateName: 'Research Paper',
-            status: 'pending',
-            submittedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-            id: 3,
-            authorName: 'Mike Johnson',
-            templateName: 'Project Proposal',
-            status: 'reviewing',
-            submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    create: async (templateData) => {
+        try {
+            try {
+                const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEMPLATES}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(templateData)
+                });
+                const j = await resp.json().catch(() => ({}));
+                if (resp.ok && j && j.success) return { success: true, data: j.data };
+            } catch (_) {}
+            const supa = window.__supabaseClient || window.supabaseClient;
+            const session = supa ? await supa.auth.getSession() : null;
+            const userId = session?.data?.session?.user?.id || null;
+            if (!supa || !userId) return LocalTemplateStore.create(templateData);
+            const metaBase = templateData.metadata || {};
+            const editorMeta = metaBase.editor || {};
+            if (templateData.content) editorMeta.content = templateData.content;
+            metaBase.editor = editorMeta;
+            if (!metaBase.status) metaBase.status = 'draft';
+            const extras = { structure: (templateData.structure !== undefined) ? templateData.structure : {}, chapters: (templateData.chapters !== undefined) ? templateData.chapters : [], variables: (templateData.variables !== undefined) ? templateData.variables : [] };
+            const payload = { name: templateData.name || 'Untitled Template', description: templateData.description || '', category: templateData.category || 'general', metadata: metaBase, created_by: userId, version: 1, ...extras };
+            let insertRes = await supa.from('templates').insert(payload).select('id, version, name, category, updated_at, metadata').single();
+            if (insertRes.error && /column .* does not exist/i.test(insertRes.error.message || '')) {
+                const { structure, chapters, variables, ...withoutExtras } = payload;
+                insertRes = await supa.from('templates').insert(withoutExtras).select('id, version, name, category, updated_at, metadata').single();
+            } else if (insertRes.error && /invalid input syntax/i.test(insertRes.error.message || '')) {
+                const retryPayload = { ...payload, structure: '{}' };
+                insertRes = await supa.from('templates').insert(retryPayload).select('id, version, name, category, updated_at, metadata').single();
+            }
+            if (insertRes.error) throw insertRes.error;
+            return { success: true, data: insertRes.data };
+        } catch (e) {
+            try { const supa = window.__supabaseClient || window.supabaseClient; const session = await supa.auth.getSession(); const userId = session?.data?.session?.user?.id || null; if (userId) return { success: false, error: e.message }; } catch (_) {}
+            return LocalTemplateStore.create(templateData);
         }
-    ]
+    },
+    getById: async (id) => {
+        try {
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (supa) {
+                const { data, error } = await supa.from('templates').select('id, name, description, category, metadata, version, created_by, updated_at').eq('id', id).single();
+                if (!error && data) return { success: true, data };
+            }
+            try { const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEMPLATES}/${encodeURIComponent(String(id))}`); const j = await resp.json().catch(() => ({})); if (resp.ok && j && j.success && j.data) return { success: true, data: j.data }; } catch (_) {}
+        } catch (e) {}
+        return LocalTemplateStore.getById(id);
+    },
+    save: async (templateData) => {
+        try {
+            if (!templateData.id) return TemplateAPI.create(templateData);
+            const nextVersion = (templateData.version || 1) + 1;
+            const metaBase = templateData.metadata || {};
+            const editorMeta = metaBase.editor || {};
+            if (templateData.content) editorMeta.content = templateData.content;
+            metaBase.editor = editorMeta;
+            const extras = { structure: (templateData.structure !== undefined) ? templateData.structure : {}, chapters: (templateData.chapters !== undefined) ? templateData.chapters : [], variables: (templateData.variables !== undefined) ? templateData.variables : [] };
+            const backendPayload = { ...templateData, metadata: metaBase, version: nextVersion, ...extras };
+            try { const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEMPLATES}/${encodeURIComponent(String(templateData.id))}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(backendPayload) }); const j = await resp.json().catch(() => ({})); if (resp.ok && j && j.success) return { success: true, data: j.data }; } catch (_) {}
+            const supa = window.__supabaseClient || window.supabaseClient; const session = supa ? await supa.auth.getSession() : null; const userId = session?.data?.session?.user?.id || null; if (!supa || !userId) return LocalTemplateStore.save(templateData);
+            const payload = { name: templateData.name, description: templateData.description, category: templateData.category || 'general', metadata: metaBase, version: nextVersion, created_by: templateData.created_by || userId, ...extras };
+            let updateRes = await supa.from('templates').update(payload).eq('id', templateData.id).select('id, version, name, category, updated_at, metadata').single();
+            if (updateRes.error && /column .* does not exist/i.test(updateRes.error.message || '')) {
+                const { structure, chapters, variables, ...withoutExtras } = payload;
+                updateRes = await supa.from('templates').update(withoutExtras).eq('id', templateData.id).select('id, version, name, category, updated_at, metadata').single();
+            } else if (updateRes.error && /invalid input syntax/i.test(updateRes.error.message || '')) {
+                const retryPayload = { ...payload, structure: '{}' };
+                updateRes = await supa.from('templates').update(retryPayload).eq('id', templateData.id).select('id, version, name, category, updated_at, metadata').single();
+            }
+            if (updateRes.error) throw updateRes.error;
+            return { success: true, data: updateRes.data };
+        } catch (e) {
+            try { const supa = window.__supabaseClient || window.supabaseClient; const session = await supa.auth.getSession(); const userId = session?.data?.session?.user?.id || null; if (userId) return { success: false, error: e.message }; } catch (_) {}
+            return LocalTemplateStore.save(templateData);
+        }
+    },
+    delete: async (id) => {
+        try {
+            try { const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEMPLATES}/${encodeURIComponent(String(id))}`, { method: 'DELETE' }); const j = await resp.json().catch(() => ({})); if (resp.ok && j && j.success) return { success: true, data: { id } }; } catch (_) {}
+            const supa = window.__supabaseClient || window.supabaseClient; if (supa) { const { error } = await supa.from('templates').delete().eq('id', id); if (!error) return { success: true, data: { id } }; }
+            throw new Error('Delete failed');
+        } catch (e) { return LocalTemplateStore.delete(id); }
+    }
 };
 
 /**
@@ -385,6 +279,19 @@ async function handleMockApiCall(endpoint, method, body) {
  */
 function handleMockLogin(credentials) {
     const { email, password } = credentials;
+
+    // Special case for admin user to bypass password check for this demo
+    if (email === 'admin@example.com') {
+        const user = (MOCK_DATA.users.find(u => u.email === email)) || { id: 'admin-local', email: 'admin@example.com', name: 'Admin', role: 'admin' };
+        const token = 'mock-token-' + Math.random().toString(36).substring(7);
+        return {
+            success: true,
+            data: {
+                token,
+                user: { id: user.id, email: user.email, name: user.name, role: user.role }
+            }
+        };
+    }
     
     const user = MOCK_DATA.users.find(u => u.email === email && u.password === password);
     
@@ -455,98 +362,61 @@ async function apiCall(endpoint, options = {}) {
  * AUTH API
  */
 const AuthAPI = {
-    // [ADDED]: Step Auth - Real Supabase authentication.
+    // Backend-first auth; falls back to local mock. No Supabase Auth.
     login: async (email, password) => {
         try {
-            const supa = window.__supabaseClient || window.supabaseClient;
-            if (!supa) throw new Error('Supabase client not initialized');
-
-            // First try to sign in with Supabase Auth
-            const { data, error } = await supa.auth.signInWithPassword({ email, password });
-            if (!error && data && data.session && data.user) {
-                const session = data.session;
-                const user = data.user;
-                // Enrich with profile from public.users table
-                const profileRes = await UsersAPI.getOrCreateProfile({ id: user.id, email: user.email });
-                const profile = profileRes?.data || {};
-                return {
-                    success: true,
-                    data: {
-                        token: session.access_token,
-                        user: {
-                            id: user.id,
-                            email: user.email,
-                            name: profile.name || user.email,
-                            role: profile.role || 'admin',
-                            department: profile.department || undefined
-                        }
-                    }
-                };
-            }
-
-            // If Supabase sign-in failed, offer helpful fallbacks
-            let errMsg = error?.message || 'Login failed';
-            if (error?.status === 400 || /Invalid login credentials/i.test(errMsg)) {
-                errMsg = 'Invalid email or password. If this is a new account, ensure Email provider is enabled and the user is confirmed.';
-            }
-            if (/Email not confirmed/i.test(errMsg)) {
-                errMsg = 'Email not confirmed. Please click the confirmation link sent to your email, then try again.';
-            }
-
-            // 1) Prototype fallback: use mock users when prototype mode is enabled
-            if (API_CONFIG.PROTOTYPE_MODE) {
-                const mock = handleMockLogin({ email, password });
-                if (mock.success) {
-                    return mock;
-                }
-            }
-
-            // 2) Attempt to sign up (if email/password auth enabled)
-            // Note: if email confirmation is required, session will be null and the user must confirm via email
+            const inputEmail = (email || '').trim();
+            const normalized = inputEmail.toLowerCase() === 'admin' ? 'admin@example.com' : inputEmail;
+            // Try backend minimal auth (users table + bcrypt)
             try {
-                const signUpRes = await supa.auth.signUp({ email, password });
-                const sUser = signUpRes?.data?.user;
-                const sSession = signUpRes?.data?.session;
-                if (sUser && sSession) {
-                    const profileRes = await UsersAPI.getOrCreateProfile({ id: sUser.id, email: sUser.email });
-                    const profile = profileRes?.data || {};
-                    return {
-                        success: true,
-                        data: {
-                            token: sSession.access_token,
-                            user: {
-                                id: sUser.id,
-                                email: sUser.email,
-                                name: profile.name || sUser.email,
-                                role: profile.role || 'admin',
-                                department: profile.department || undefined
-                            }
-                        }
-                    };
-                } else if (sUser && !sSession) {
-                    return { success: false, error: 'Sign-up succeeded. Please check your email and confirm your account, then sign in.' };
+                const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: normalized, password })
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data && (data.success === true || data.token || data.data)) {
+                    return data.success !== undefined ? data : { success: true, data };
                 }
-            } catch (signUpErr) {
-                // Surface sign-up error details to help debugging 400s
-                const m = signUpErr?.message || 'Sign-up failed';
-                return { success: false, error: m };
+            } catch (_) {
+                // ignore and fall through
             }
 
-            return { success: false, error: errMsg };
+            // Fallback to mock users
+            const mock = handleMockLogin({ email: normalized, password });
+            if (mock.success) {
+                return mock;
+            }
+
+            return { success: false, error: 'Login failed (backend unavailable and no mock user match)' };
         } catch (e) {
-            console.error('Supabase login error:', e);
             return { success: false, error: e.message || 'Login failed' };
         }
     },
 
+    signup: async ({ email, password, name, role = 'admin' }) => {
+        try {
+            const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SIGNUP}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, name, role })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (resp.ok && data) return data;
+            return { success: false, error: data?.detail || data?.error || 'Signup failed' };
+        } catch (e) {
+            return { success: false, error: e.message || 'Signup failed' };
+        }
+    },
+
     logout: async () => {
+        // With backend-managed auth, just clear token locally
         try {
             const supa = window.__supabaseClient || window.supabaseClient;
-            if (!supa) throw new Error('Supabase client not initialized');
-            await supa.auth.signOut();
-        } catch (e) {
-            console.warn('Supabase logout warning:', e.message);
-        }
+            if (supa && supa.auth && typeof supa.auth.signOut === 'function') {
+                await supa.auth.signOut();
+            }
+        } catch (e) { /* ignore */ }
         clearAuthToken();
         return { success: true, data: { message: 'Logged out successfully' } };
     }
@@ -559,6 +429,15 @@ const DashboardAPI = {
     // [ADDED]: Step Dashboard - Fetch real stats from Supabase
     getStats: async () => {
         try {
+            // Backend first
+            try {
+                const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DASHBOARD_STATS}`);
+                const j = await resp.json().catch(() => ({}));
+                if (resp.ok && j && j.success && j.data) {
+                    return { success: true, data: j.data };
+                }
+            } catch (_) { /* fallback to Supabase */ }
+
             const supa = window.__supabaseClient || window.supabaseClient;
             if (!supa) throw new Error('Supabase client not initialized');
 
@@ -585,6 +464,15 @@ const DashboardAPI = {
     // [ADDED]: Step Dashboard - Fetch recent documents and enrich with names
     getRecentDocuments: async () => {
         try {
+            // Backend first
+            try {
+                const resp = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RECENT_DOCS}`);
+                const j = await resp.json().catch(() => ({}));
+                if (resp.ok && j && j.success && Array.isArray(j.data)) {
+                    return { success: true, data: j.data };
+                }
+            } catch (_) { /* fallback to Supabase */ }
+
             const supa = window.__supabaseClient || window.supabaseClient;
             if (!supa) throw new Error('Supabase client not initialized');
 
@@ -626,233 +514,6 @@ const DashboardAPI = {
 /**
  * TEMPLATE API
  */
-const TemplateAPI = {
-    // [ADDED]: Step Templates - Real Supabase-backed CRUD
-    getAll: async () => {
-        try {
-            const supa = window.__supabaseClient || window.supabaseClient;
-            // If Supabase client isn't available, immediately fall back to local store
-            if (!supa) {
-                console.warn('Supabase client not initialized — falling back to LocalTemplateStore');
-                return LocalTemplateStore.getAll();
-            }
-
-            // Try to fetch templates from Supabase regardless of session state.
-            // If RLS or permissions prevent access, we will catch the error and fall back.
-            const { data, error } = await supa
-                .from('templates')
-                .select('id, name, category, updated_at, metadata')
-                .order('updated_at', { ascending: false });
-
-            if (error) {
-                console.warn('Supabase templates fetch failed, falling back to local store:', error.message || error);
-                return LocalTemplateStore.getAll();
-            }
-
-            return { success: true, data: data || [] };
-        } catch (e) {
-            console.error('Template getAll unexpected error:', e);
-            return LocalTemplateStore.getAll();
-        }
-    },
-    
-    create: async (templateData) => {
-        try {
-            const supa = window.__supabaseClient || window.supabaseClient;
-            const session = await supa.auth.getSession();
-            const userId = session?.data?.session?.user?.id || null;
-            if (!userId) {
-                // Not logged in: use local fallback to preserve UX
-                return LocalTemplateStore.create(templateData);
-            }
-
-            // Embed editor content into metadata to avoid requiring specific DB columns
-            const metaBase = templateData.metadata || {};
-            const editorMeta = metaBase.editor || {};
-            if (templateData.content) {
-                editorMeta.content = templateData.content;
-            }
-            metaBase.editor = editorMeta;
-            if (!metaBase.status) metaBase.status = 'draft';
-            // Some databases have NOT NULL constraints on legacy columns
-            const extras = {
-                structure: (templateData.structure !== undefined) ? templateData.structure : {},
-                chapters: (templateData.chapters !== undefined) ? templateData.chapters : [],
-                variables: (templateData.variables !== undefined) ? templateData.variables : []
-            };
-            const payload = {
-                name: templateData.name || 'Untitled Template',
-                description: templateData.description || '',
-                category: templateData.category || 'general',
-                metadata: metaBase,
-                created_by: userId,
-                version: 1,
-                ...extras
-            };
-            // First attempt with extras (covers NOT NULL structure)
-            let insertRes = await supa.from('templates').insert(payload).select('id, version, name, category, updated_at, metadata').single();
-            // Handle FK constraint mismatch: table may reference public.users(id) instead of auth.users(id)
-            if (insertRes.error && /foreign key constraint/i.test(insertRes.error.message || '')) {
-                try {
-                    const user = (await supa.auth.getUser()).data.user;
-                    const profRes = await UsersAPI.getOrCreateProfile({ id: user?.id, email: user?.email });
-                    const profile = profRes?.data;
-                    if (profile?.id && profile.id !== payload.created_by) {
-                        const retryPayload = { ...payload, created_by: profile.id };
-                        insertRes = await supa.from('templates').insert(retryPayload).select('id, version, name, category, updated_at, metadata').single();
-                    }
-                } catch (_) { /* ignore */ }
-            }
-            if (insertRes.error && /column .* does not exist/i.test(insertRes.error.message || '')) {
-                // Retry without extras if the table doesn't have those columns
-                const { structure, chapters, variables, ...withoutExtras } = payload;
-                insertRes = await supa.from('templates').insert(withoutExtras).select('id, version, name, category, updated_at, metadata').single();
-            } else if (insertRes.error && /invalid input syntax/i.test(insertRes.error.message || '')) {
-                // Retry with string '{}' for structure if type is text
-                const retryPayload = { ...payload, structure: '{}' };
-                insertRes = await supa.from('templates').insert(retryPayload).select('id, version, name, category, updated_at, metadata').single();
-            }
-            if (insertRes.error) throw insertRes.error;
-            return { success: true, data: insertRes.data };
-        } catch (e) {
-            // If authenticated, surface the error (likely RLS/columns)
-            try {
-                const supa = window.__supabaseClient || window.supabaseClient;
-                const session = await supa.auth.getSession();
-                const userId = session?.data?.session?.user?.id || null;
-                if (userId) {
-                    return { success: false, error: e.message };
-                }
-            } catch (_) { /* ignore */ }
-            // If not authenticated, fallback locally
-            return LocalTemplateStore.create(templateData);
-        }
-    },
-
-    getById: async (id) => {
-        try {
-            const supa = window.__supabaseClient || window.supabaseClient;
-            const { data, error } = await supa
-                .from('templates')
-                .select('id, name, description, category, metadata, version, created_by, updated_at')
-                .eq('id', id)
-                .single();
-            if (error) throw error;
-            return { success: true, data };
-        } catch (e) {
-            const fb = LocalTemplateStore.getById(id);
-            if (!fb.success) {
-                console.error('Template getById error:', e);
-            }
-            return fb;
-        }
-    },
-
-    save: async (templateData) => {
-        try {
-            const supa = window.__supabaseClient || window.supabaseClient;
-            const session = await supa.auth.getSession();
-            const userId = session?.data?.session?.user?.id || null;
-            if (!userId) {
-                // Not logged in: fallback to local storage
-                return LocalTemplateStore.save(templateData);
-            }
-
-            if (!templateData.id) {
-                return TemplateAPI.create(templateData);
-            }
-
-            const nextVersion = (templateData.version || 1) + 1;
-            const metaBase = templateData.metadata || {};
-            const editorMeta = metaBase.editor || {};
-            if (templateData.content) {
-                editorMeta.content = templateData.content;
-            }
-            metaBase.editor = editorMeta;
-            const extras = {
-                structure: (templateData.structure !== undefined) ? templateData.structure : {},
-                chapters: (templateData.chapters !== undefined) ? templateData.chapters : [],
-                variables: (templateData.variables !== undefined) ? templateData.variables : []
-            };
-            const payload = {
-                name: templateData.name,
-                description: templateData.description,
-                category: templateData.category || 'general',
-                metadata: metaBase,
-                version: nextVersion,
-                created_by: templateData.created_by || userId,
-                ...extras
-            };
-            let updateRes = await supa
-                .from('templates')
-                .update(payload)
-                .eq('id', templateData.id)
-                .select('id, version, name, category, updated_at, metadata')
-                .single();
-            if (updateRes.error && /foreign key constraint/i.test(updateRes.error.message || '')) {
-                try {
-                    const user = (await supa.auth.getUser()).data.user;
-                    const profRes = await UsersAPI.getOrCreateProfile({ id: templateData.created_by || user?.id, email: user?.email });
-                    const profile = profRes?.data;
-                    if (profile?.id && profile.id !== payload.created_by) {
-                        const retryPayload = { ...payload, created_by: profile.id };
-                        updateRes = await supa
-                            .from('templates')
-                            .update(retryPayload)
-                            .eq('id', templateData.id)
-                            .select('id, version, name, category, updated_at, metadata')
-                            .single();
-                    }
-                } catch (_) { /* ignore */ }
-            }
-            if (updateRes.error && /column .* does not exist/i.test(updateRes.error.message || '')) {
-                // Retry without extras if columns don't exist
-                const { structure, chapters, variables, ...withoutExtras } = payload;
-                updateRes = await supa
-                    .from('templates')
-                    .update(withoutExtras)
-                    .eq('id', templateData.id)
-                    .select('id, version, name, category, updated_at, metadata')
-                    .single();
-            } else if (updateRes.error && /invalid input syntax/i.test(updateRes.error.message || '')) {
-                // Retry with string '{}' for structure if type is text
-                const retryPayload = { ...payload, structure: '{}' };
-                updateRes = await supa
-                    .from('templates')
-                    .update(retryPayload)
-                    .eq('id', templateData.id)
-                    .select('id, version, name, category, updated_at, metadata')
-                    .single();
-            }
-            if (updateRes.error) throw updateRes.error;
-            return { success: true, data: updateRes.data };
-        } catch (e) {
-            // If authenticated, surface the error so UI shows it
-            try {
-                const supa = window.__supabaseClient || window.supabaseClient;
-                const session = await supa.auth.getSession();
-                const userId = session?.data?.session?.user?.id || null;
-                if (userId) {
-                    return { success: false, error: e.message };
-                }
-            } catch (_) { /* ignore */ }
-            // If not authenticated, fallback locally
-            return LocalTemplateStore.save(templateData);
-        }
-    },
-
-    delete: async (id) => {
-        try {
-            const supa = window.__supabaseClient || window.supabaseClient;
-            const { error } = await supa.from('templates').delete().eq('id', id);
-            if (error) throw error;
-            return { success: true, data: { id } };
-        } catch (e) {
-            console.warn('Template delete falling back to local store:', e.message);
-            return LocalTemplateStore.delete(id);
-        }
-    }
-};
 
 /**
  * AUTHORS API
@@ -864,8 +525,16 @@ const AuthorsAPI = {
             return { success: true, data: MOCK_DATA.authors };
         }
 
-        // Prefer Supabase client when available
+        // Backend-first for reliability and admin exclusion
         try {
+            try {
+                const resp = await fetch(`${API_CONFIG.BASE_URL}/authors`);
+                const j = await resp.json().catch(() => ({}));
+                if (resp.ok && j && j.success && Array.isArray(j.data)) {
+                    return { success: true, data: j.data };
+                }
+            } catch (_) { /* fallback to Supabase */ }
+
             const supa = window.__supabaseClient || window.supabaseClient;
             if (!supa) {
                 // Fallback to existing backend endpoint
@@ -876,6 +545,8 @@ const AuthorsAPI = {
             const { data: users, error: usersErr } = await supa
                 .from('users')
                 .select('id, name, email, role, department, status, bio, created_at, last_active')
+                .neq('role', 'admin')
+                .neq('email', 'admin@example.com')
                 .order('created_at', { ascending: false });
 
             if (usersErr) {
@@ -899,7 +570,8 @@ const AuthorsAPI = {
             }
 
             // Map users to author shape expected by UI, computing counts from documents
-            const authors = (users || []).map(u => {
+            const filteredUsers = (users || []).filter(u => (u.role || '').toLowerCase() !== 'admin' && (u.email || '').toLowerCase() !== 'admin@example.com');
+            const authors = filteredUsers.map(u => {
                 const userDocs = docs.filter(d => String(d.created_by) === String(u.id));
                 const documents_count = userDocs.length;
                 const completed_count = userDocs.filter(d => ['completed', 'published'].includes((d.status || '').toLowerCase())).length;

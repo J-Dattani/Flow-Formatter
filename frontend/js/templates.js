@@ -194,6 +194,19 @@ async function loadTemplates() {
     // If neither exists, nothing to do
     if (!tableBody && !grid) return;
 
+    // Show a simple loading state
+    if (grid) {
+        grid.innerHTML = `
+            <div class="col-12 d-flex justify-content-center my-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>`;
+    }
+    if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
+    }
+
     try {
         const result = await TemplateAPI.getAll();
         const list = (result && result.success && Array.isArray(result.data)) ? result.data : [];
@@ -211,7 +224,7 @@ async function loadTemplates() {
             tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading templates</td></tr>';
         }
         if (grid) {
-            grid.insertAdjacentHTML('beforeend', '<div class="col-12 text-center text-danger">Error loading templates</div>');
+            grid.innerHTML = '<div class="col-12 text-center text-danger my-3">Error loading templates</div>';
         }
     }
 }

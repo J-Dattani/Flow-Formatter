@@ -10,6 +10,10 @@ class DocumentMerger {
         this.sortableInstance = null;
         this.totalPages = 0;
         this.totalSize = 0;
+        // Backend integration state
+        this.apiBase = 'http://127.0.0.1:8000/api';
+        this.lastMergedBlob = null;
+        this.previewObjectUrl = null;
         
         this.init();
     }
@@ -86,7 +90,9 @@ class DocumentMerger {
             }
         }
 
-        this.updateStats();
+    this.updateStats();
+    // Ask backend for accurate pages/size/words after adding files
+    try { refreshFileStats(); } catch {}
         this.showFilesSection();
         this.updateStepStatus('step1', true);
         
@@ -521,7 +527,35 @@ class DocumentMerger {
     generatePreview() {
         const previewContainer = document.getElementById('previewContainer');
         const documentTitle = document.getElementById('documentTitle').value || 'Merged Document';
-        
+
+        // If we have a merged PDF from backend, embed it; otherwise, fall back to static preview
+        if (this.lastMergedBlob instanceof Blob) {
+            // Revoke previous URL if any
+            if (this.previewObjectUrl) {
+                URL.revokeObjectURL(this.previewObjectUrl);
+                this.previewObjectUrl = null;
+            }
+
+            const objectUrl = URL.createObjectURL(this.lastMergedBlob);
+            this.previewObjectUrl = objectUrl;
+
+            previewContainer.innerHTML = '';
+            const titleEl = document.createElement('div');
+            titleEl.className = 'mb-3';
+            titleEl.innerHTML = `<h4 class="mb-1">${this.escapeHtml(documentTitle)}</h4><small class="text-muted">Preview of generated PDF</small>`;
+
+            const viewer = document.createElement('iframe');
+            viewer.style.width = '100%';
+            viewer.style.minHeight = '600px';
+            viewer.style.border = '1px solid #e9ecef';
+            viewer.src = objectUrl;
+
+            previewContainer.appendChild(titleEl);
+            previewContainer.appendChild(viewer);
+            return;
+        }
+
+        // Fallback: static preview (pre-existing behavior)
         let previewHTML = `
             <div class="document-preview" style="font-family: 'Inter', sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; background: white; padding: 2rem; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
                 <div class="text-center mb-4">
@@ -531,7 +565,6 @@ class DocumentMerger {
                 </div>
         `;
 
-        // Generate preview content for each file
         this.uploadedFiles.forEach((file, index) => {
             previewHTML += `
                 <div class="document-section mb-5">
@@ -636,6 +669,7 @@ function removeFile(fileId) {
             
             // Update stats and file numbers
             window.documentMerger.updateStats();
+            try { refreshFileStats(); } catch {}
             window.documentMerger.updateFileNumbers();
             window.documentMerger.showToast(`${fileName} removed`, 'info');
             
@@ -714,33 +748,148 @@ async function startMerge() {
     merger.updateMergeStatus('Processing');
     merger.updateStepStatus('step3', false);
     
-    // Simulate merge process
-    const steps = [
-        'Parsing document structure...',
-        'Extracting content blocks...',
-        'Applying master template...',
-        'Merging content sections...',
-        'Formatting consistency check...',
-        'Generating final document...'
-    ];
-    
-    for (let i = 0; i < steps.length; i++) {
-        document.getElementById('processingText').textContent = steps[i];
-        document.getElementById('processingProgress').style.width = `${(i + 1) * 16.67}%`;
-        await merger.delay(800);
+    // Prepare form data with supported types (PDF/DOCX/TXT)
+    const supportedFiles = merger.uploadedFiles.filter(f => {
+        const name = (f.name || '').toLowerCase();
+        const t = (f.file?.type || '').toLowerCase();
+        return (
+            t === 'application/pdf' || name.endsWith('.pdf') ||
+            t.endsWith('officedocument.wordprocessingml.document') || name.endsWith('.docx') ||
+            t.startsWith('text/') || name.endsWith('.txt')
+        );
+    });
+    if (supportedFiles.length === 0) {
+        merger.showToast('Please upload a PDF, DOCX, or TXT file for merging', 'error');
+        processingModal.hide();
+        return;
     }
-    
-    // Complete merge
-    merger.updateStepStatus('step3', true);
-    merger.updateMergeStatus('Completed');
-    
-    // Hide modal and show preview
-    processingModal.hide();
-    merger.showPreviewSection();
-    merger.showToast('Documents merged successfully!', 'success');
-    
-    // Scroll to preview
-    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+
+    const formData = new FormData();
+    supportedFiles.forEach(f => {
+        formData.append('files', f.file, f.name);
+    });
+    // UI options
+    try {
+        const pageSizeEl = document.getElementById('pageSize');
+        const generateTocEl = document.getElementById('generateToc');
+        const addPageBreaksEl = document.getElementById('addPageBreaks');
+        const autoNumberingEl = document.getElementById('autoNumbering');
+        if (pageSizeEl && pageSizeEl.value) {
+            formData.append('page_size', pageSizeEl.value);
+        }
+        if (generateTocEl) {
+            formData.append('generate_toc', generateTocEl.checked ? 'true' : 'false');
+        } else {
+            formData.append('generate_toc', 'true');
+        }
+        if (addPageBreaksEl) {
+            formData.append('add_page_breaks', addPageBreaksEl.checked ? 'true' : 'false');
+        }
+        if (autoNumberingEl) {
+            formData.append('page_numbers', autoNumberingEl.checked ? 'true' : 'false');
+        }
+    } catch {}
+
+    // Animate progress while performing the network request
+    const steps = [
+        'Uploading files...',
+        'Analyzing structure...',
+        'Detecting headings and TOC...',
+        'Merging pages...',
+        'Applying layout...',
+        'Finalizing PDF...'
+    ];
+
+    let progress = 0;
+    const progressEl = document.getElementById('processingProgress');
+    const textEl = document.getElementById('processingText');
+
+    const animate = async () => {
+        for (let i = 0; i < steps.length; i++) {
+            textEl.textContent = steps[i];
+            progress = Math.min(100, progress + 100 / steps.length);
+            progressEl.style.width = `${progress}%`;
+            await merger.delay(500);
+        }
+    };
+
+    try {
+        // Run animation and fetch in parallel
+        const fetchPromise = fetch(`${merger.apiBase}/merge/generate-toc-from-pdf`, {
+            method: 'POST',
+            body: formData
+        });
+
+        await Promise.race([
+            (async () => { await animate(); })(),
+            (async () => { await merger.delay(3500); })(), // ensure some animation even if fast
+        ]);
+
+        const res = await fetchPromise;
+        if (!res.ok) {
+            // Try to read error body for diagnostics
+            let detail = '';
+            try {
+                const text = await res.text();
+                if (text) detail = `: ${text.substring(0, 400)}`;
+            } catch {}
+            throw new Error(`Merge failed (${res.status})${detail}`);
+        }
+        const blob = await res.blob();
+        if (!blob || blob.size === 0) {
+            throw new Error('Empty PDF received');
+        }
+
+        // Store for preview and download
+        merger.lastMergedBlob = blob;
+
+        // Complete merge UI
+        merger.updateStepStatus('step3', true);
+        merger.updateMergeStatus('Completed');
+
+        processingModal.hide();
+        merger.showPreviewSection();
+        merger.showToast('Documents merged successfully!', 'success');
+        document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+        console.error('Merge error:', err);
+        merger.updateMergeStatus('Error');
+        document.getElementById('processingText').textContent = 'An error occurred during merging';
+        progressEl.style.width = '100%';
+        await merger.delay(600);
+        processingModal.hide();
+        merger.showToast(String(err.message || err), 'error');
+    }
+}
+
+// Enhance stats: query backend for accurate pages/size/words
+async function refreshFileStats() {
+    if (!window.documentMerger) return;
+    const merger = window.documentMerger;
+    if (merger.uploadedFiles.length === 0) return;
+    const fd = new FormData();
+    merger.uploadedFiles.forEach(f => fd.append('files', f.file, f.name));
+    try {
+        const res = await fetch(`${merger.apiBase}/merge/inspect`, { method: 'POST', body: fd });
+        if (!res.ok) return;
+        const json = await res.json();
+        const byName = new Map();
+        json.files.forEach(info => byName.set(info.name, info));
+        let totalPages = 0; let totalSize = 0;
+        merger.uploadedFiles.forEach(f => {
+            const info = byName.get(f.name);
+            if (info) {
+                f.pages = info.pages || f.pages || 1;
+                f.size = info.size || f.size;
+            }
+            totalPages += f.pages||0; totalSize += f.size||0;
+        });
+        merger.totalPages = totalPages; merger.totalSize = totalSize;
+        document.getElementById('totalFiles').textContent = merger.uploadedFiles.length;
+        document.getElementById('totalPages').textContent = merger.totalPages;
+        document.getElementById('totalSize').textContent = (merger.totalSize / (1024 * 1024)).toFixed(1);
+        merger.updateFileNumbers();
+    } catch {}
 }
 
 async function exportDocument(format) {
@@ -749,18 +898,28 @@ async function exportDocument(format) {
     const merger = window.documentMerger;
     const documentTitle = document.getElementById('documentTitle').value.trim() || 'Merged Document';
     
-    merger.showToast(`Preparing ${format.toUpperCase()} export...`, 'info');
-    
-    // Simulate export process
-    await merger.delay(1500);
-    
-    // In real implementation, this would trigger actual file download
-    const filename = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${format}`;
-    merger.showToast(`${format.toUpperCase()} export ready: ${filename}`, 'success');
-    merger.updateStepStatus('step4', true);
-    
-    // Simulate download
-    console.log(`Would download: ${filename}`);
+    if (format.toLowerCase() === 'pdf') {
+        if (merger.lastMergedBlob instanceof Blob) {
+            const url = URL.createObjectURL(merger.lastMergedBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            merger.updateStepStatus('step4', true);
+            merger.showToast('PDF downloaded', 'success');
+            return;
+        }
+        // If no blob yet, try to merge now
+        merger.showToast('No merged PDF yet. Starting merge...', 'info');
+        await startMerge();
+        return;
+    }
+
+    // Other formats not yet supported by backend
+    merger.showToast(`${format.toUpperCase()} export is not available yet`, 'warning');
 }
 
 function showHelp() {
@@ -793,19 +952,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load saved presets
     loadMergePresets();
+
+    // After initial add, keep stats in sync
+    setTimeout(refreshFileStats, 300);
 });
 
 // Dark Mode Functions
 function initializeDarkMode() {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const savedTheme = localStorage.getItem('theme') || 'light';
-    
+
+    // Apply saved theme regardless of toggle presence
     if (savedTheme === 'dark') {
         document.body.setAttribute('data-theme', 'dark');
-        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        if (darkModeToggle) darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     }
-    
-    darkModeToggle.addEventListener('click', toggleDarkMode);
+
+    // Safeguard: toggle may not exist on some pages
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
 }
 
 function toggleDarkMode() {
@@ -837,7 +1003,7 @@ function initializeKeyboardShortcuts() {
         if (e.ctrlKey && e.key === 'm') {
             e.preventDefault();
             if (window.documentMerger.uploadedFiles.length > 0) {
-                mergeDocuments();
+                startMerge();
             }
         }
         

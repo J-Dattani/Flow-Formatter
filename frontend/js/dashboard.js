@@ -175,21 +175,26 @@ async function loadTemplateStats() {
     if (!statsContainer) return;
     
     try {
-        const supa = window.__supabaseClient || window.supabaseClient;
-        if (!supa) {
-            // Fallback to mock if no client
-            displayTemplateStats([
-                { name: 'Report', percentage: 45, color: 'primary' },
-                { name: 'Resume', percentage: 30, color: 'success' },
-                { name: 'Academic', percentage: 25, color: 'warning' }
-            ]);
-            return;
+        // Prefer backend via TemplateAPI (service-role backed)
+        let templates = [];
+        try {
+            const res = await TemplateAPI.getAll();
+            if (res && res.success && Array.isArray(res.data)) {
+                templates = res.data;
+            }
+        } catch (_) { /* ignore */ }
+
+        // Fallback to Supabase client if backend path yields nothing
+        if ((!templates || templates.length === 0)) {
+            const supa = window.__supabaseClient || window.supabaseClient;
+            if (supa) {
+                const { data, error } = await supa.from('templates').select('id, name, category, metadata');
+                if (!error && Array.isArray(data)) {
+                    templates = data;
+                }
+            }
         }
 
-        // Query grouped counts by category (or fallback to metadata->type if category missing)
-        // We'll request a simple select and compute percentages client-side
-        const { data: templates, error } = await supa.from('templates').select('id, name, category, metadata');
-        if (error) throw error;
         if (!templates || templates.length === 0) {
             statsContainer.innerHTML = '<p class="text-center text-muted">No template statistics available</p>';
             return;
@@ -197,7 +202,8 @@ async function loadTemplateStats() {
 
         const counts = {};
         templates.forEach(t => {
-            const cat = (t.category || (t.metadata && t.metadata.type) || 'Uncategorized').toString();
+            const meta = t.metadata || {};
+            const cat = (t.category || meta.type || (meta.category || 'Uncategorized')).toString();
             counts[cat] = (counts[cat] || 0) + 1;
         });
 

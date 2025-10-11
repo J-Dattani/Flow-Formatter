@@ -14,8 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
  * Check if user is authenticated
  */
 async function checkAuthentication() {
-    const currentPage = window.location.pathname;
-    const isLoginPage = currentPage.includes('index.html') || currentPage.endsWith('/');
+    const currentPage = (window.location.pathname || '').toLowerCase();
+    // Treat login/signup and public landing as public pages that should not redirect away
+    const isLoginLike = currentPage.endsWith('/user/login.html') || currentPage.endsWith('login.html');
+    const isSignupLike = currentPage.endsWith('/user/signup.html') || currentPage.endsWith('signup.html');
+    const isUserLanding = currentPage.endsWith('/user/index.html');
+    const isRoot = currentPage === '/' || currentPage.endsWith('/index.html');
+    const isPublicPage = isLoginLike || isSignupLike || isUserLanding || isRoot;
     let isAuthenticated = false;
 
     try {
@@ -44,14 +49,14 @@ async function checkAuthentication() {
         console.warn('Auth check error:', e);
     }
 
-    // If not authenticated and not on login page, redirect to login
-    if (!isAuthenticated && !isLoginPage) {
-        window.location.href = 'index.html';
+    // If not authenticated and not on a public page, redirect to user login
+    if (!isAuthenticated && !isPublicPage) {
+        window.location.href = '/user/login.html';
         return;
     }
 
-    // If authenticated and on login page, check for drafts before redirecting
-    if (isAuthenticated && isLoginPage) {
+    // If authenticated and on a public page (login/landing), redirect into app
+    if (isAuthenticated && (isLoginLike || isUserLanding || isRoot)) {
         checkForDraftAndRedirect();
     }
 }
@@ -96,6 +101,12 @@ function initializeAuthHandlers() {
         loginForm.addEventListener('submit', handleLogin);
     }
     
+    // Signup form handler
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('submit', handleSignup);
+    }
+    
     // Logout button handler
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -133,8 +144,12 @@ async function handleLogin(e) {
             }
             // Store user info in memory
             window.currentUser = result.data.user;
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+            // Redirect based on user role
+            if (email === 'admin@example.com') {
+                window.location.href = '../admin/dashboard.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
         } else {
             // Show error message
             showError(errorMessage, result.error || 'Login failed. Please try again.');
@@ -233,4 +248,47 @@ window.AuthSystem = AuthSystem;
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AuthSystem;
+}
+
+/**
+ * Handle signup form submission
+ */
+async function handleSignup(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm-password')?.value;
+    const successEl = document.getElementById('signup-success');
+    const errorEl = document.getElementById('signup-error');
+
+    // Reset messages
+    if (successEl) { successEl.style.display = 'none'; successEl.textContent = ''; }
+    if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+
+    if (confirm !== undefined && password !== confirm) {
+        if (errorEl) { errorEl.textContent = 'Passwords do not match'; errorEl.style.display = 'block'; }
+        return;
+    }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const original = submitBtn ? submitBtn.innerHTML : null;
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...'; }
+
+    try {
+        const res = await AuthAPI.signup({ email, password, name: email });
+        if (res && res.success) {
+            if (successEl) { successEl.textContent = 'Account created. You can sign in now.'; successEl.style.display = 'block'; }
+            // Optionally auto-login
+            // await handleLogin({ preventDefault: ()=>{}, target: { querySelector: ()=>null } });
+            // Or redirect to login page
+            setTimeout(() => { window.location.href = 'index.html'; }, 800);
+        } else {
+            if (errorEl) { errorEl.textContent = res?.error || 'Signup failed'; errorEl.style.display = 'block'; }
+        }
+    } catch (err) {
+        if (errorEl) { errorEl.textContent = err?.message || 'Signup failed'; errorEl.style.display = 'block'; }
+    } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = original; }
+    }
 }

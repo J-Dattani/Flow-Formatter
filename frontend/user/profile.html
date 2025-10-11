@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings - FormatFlow</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <link href="css/profile.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <!-- Glassmorphism Background -->
+    <div class="glass-background"></div>
+    
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="landing.html">
+                    <i class="fas fa-file-alt brand-icon"></i>
+                    <span class="brand-text">FormatFlow</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="submitted.html" class="nav-link">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submitted</span>
+                </a>
+                <a href="merger.html" class="nav-link">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Merger</span>
+                </a>
+                <a href="contact.html" class="nav-link">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="profile.html" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <section class="page-header-section">
+                <div class="page-header-content">
+                    <h1 class="page-title">Profile Settings</h1>
+                    <p class="page-subtitle">Manage your account information and preferences</p>
+                </div>
+            </section>
+
+            <!-- Content Area -->
+            <div class="content-area">
+            <!-- Profile Overview -->
+            <div class="profile-overview">
+                <div class="profile-card">
+                    <div class="profile-avatar-section">
+                        <div class="avatar-container">
+                            <div class="user-avatar-large" id="userAvatarLarge">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <button class="avatar-upload-btn" onclick="profileDashboard.changeAvatar()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="profile-info">
+                            <h2 class="user-name-large" data-field="fullName">John Doe</h2>
+                            <p class="user-title" data-field="title">Professional Author</p>
+                            <div class="user-stats">
+                                <div class="stat">
+                                    <span class="stat-number" data-field="publishedCount">15</span>
+                                    <span class="stat-label">Books Published</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" data-field="inProgressCount">8</span>
+                                    <span class="stat-label">In Progress</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" data-field="followersCount">2.5K</span>
+                                    <span class="stat-label">Followers</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-badges" data-container="badges">
+                        <div class="badge-item" data-badge="top-author">
+                            <i class="fas fa-award"></i>
+                            <span>Top Author</span>
+                        </div>
+                        <div class="badge-item" data-badge="five-star">
+                            <i class="fas fa-star"></i>
+                            <span>5-Star Rating</span>
+                        </div>
+                        <div class="badge-item" data-badge="team-player">
+                            <i class="fas fa-users"></i>
+                            <span>Team Player</span>
+                        </div>
+                        <!-- Template for dynamically adding badges -->
+                        <template id="badgeTemplate">
+                            <div class="badge-item" data-badge="">
+                                <i class="fas"></i>
+                                <span></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tabs -->
+            <div class="profile-tabs">
+                <div class="tab-navigation">
+                    <button class="tab-btn active" data-tab="personal" onclick="profileDashboard.switchTab('personal', this)">
+                        <i class="fas fa-user"></i>
+                        Personal Information
+                    </button>
+                    <button class="tab-btn" data-tab="account" onclick="profileDashboard.switchTab('account', this)">
+                        <i class="fas fa-cog"></i>
+                        Account Settings
+                    </button>
+                    <button class="tab-btn" data-tab="notifications" onclick="profileDashboard.switchTab('notifications', this)">
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                    </button>
+                    <button class="tab-btn" data-tab="activity" onclick="profileDashboard.switchTab('activity', this)">
+                        <i class="fas fa-history"></i>
+                        Activity History
+                    </button>
+                </div>
+
+                <!-- Personal Information Tab -->
+                <div class="tab-content active" id="personalTab">
+                    <div class="section-header">
+                        <h3>Personal Information</h3>
+                        <button class="edit-btn" onclick="profileDashboard.toggleEditMode('personal')">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                    </div>
+                    
+                    <form class="profile-form" id="personalForm" data-form="personal-info">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="firstName" value="John" readonly data-field="firstName" data-required="true">
+                                <div class="field-feedback"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" value="Doe" readonly data-field="lastName" data-required="true">
+                                <div class="field-feedback"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" value="john.doe@example.com" readonly data-field="email" data-required="true" data-validation="email">
+                            <div class="field-feedback"></div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567" readonly data-field="phone" data-validation="phone">
+                                <div class="field-feedback"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="website">Website</label>
+                                <input type="url" id="website" name="website" value="https://johndoe.com" readonly data-field="website" data-validation="url">
+                                <div class="field-feedback"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bio">Biography</label>
+                            <textarea id="bio" name="bio" rows="4" readonly data-field="bio">John Doe is a professional author with over 10 years of experience in writing technical documentation and fiction novels. He has published 15 books and is passionate about helping other authors improve their craft.</textarea>
+                            <div class="field-feedback"></div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" name="location" value="San Francisco, CA" readonly data-field="location">
+                                <div class="field-feedback"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="timezone">Timezone</label>
+                                <select id="timezone" name="timezone" disabled data-field="timezone">
+                                    <option value="PST" selected>Pacific Standard Time (PST)</option>
+                                    <option value="EST">Eastern Standard Time (EST)</option>
+                                    <option value="CST">Central Standard Time (CST)</option>
+                                    <option value="MST">Mountain Standard Time (MST)</option>
+                                </select>
+                                <div class="field-feedback"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions" style="display: none;" data-control="form-actions">
+                            <button type="submit" class="btn-primary" data-action="save">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn-secondary" data-action="cancel" onclick="profileDashboard.cancelEdit('personal')">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </button>
+                            <div class="save-status"></div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account Settings Tab -->
+                <div class="tab-content" id="accountTab">
+                    <div class="settings-grid">
+                        <!-- Security Settings -->
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h4>
+                                    <i class="fas fa-shield-alt"></i>
+                                    Security Settings
+                                </h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h5>Password</h5>
+                                        <p>Last changed 30 days ago</p>
+                                    </div>
+                                    <button class="btn-secondary" onclick="profileDashboard.changePassword()">
+                                        Change
+                                    </button>
+                                </div>
+                                
+                                <div class="setting-item" data-setting="two-factor">
+                                    <div class="setting-info">
+                                        <h5>Two-Factor Authentication</h5>
+                                        <p>Secure your account with 2FA</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="twoFactor" data-preference="twoFactor" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item" data-setting="login-alerts">
+                                    <div class="setting-info">
+                                        <h5>Login Alerts</h5>
+                                        <p>Get notified of new login attempts</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="loginAlerts" data-preference="loginAlerts" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Privacy Settings -->
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h4>
+                                    <i class="fas fa-user-secret"></i>
+                                    Privacy Settings
+                                </h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h5>Profile Visibility</h5>
+                                        <p>Control who can see your profile</p>
+                                    </div>
+                                    <select class="form-select">
+                                        <option value="public" selected>Public</option>
+                                        <option value="private">Private</option>
+                                        <option value="friends">Friends Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h5>Show Online Status</h5>
+                                        <p>Let others see when you're online</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="onlineStatus" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h5>Data Analytics</h5>
+                                        <p>Help improve our service with usage data</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="analytics" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subscription -->
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h4>
+                                    <i class="fas fa-credit-card"></i>
+                                    Subscription
+                                </h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="subscription-info">
+                                    <div class="plan-details">
+                                        <h5>Professional Plan</h5>
+                                        <p>$29/month • Renews on March 15, 2025</p>
+                                    </div>
+                                    <span class="plan-status active">Active</span>
+                                </div>
+                                
+                                <div class="subscription-actions">
+                                    <button class="btn-primary" onclick="profileDashboard.manageBilling()">
+                                        <i class="fas fa-credit-card"></i>
+                                        Manage Billing
+                                    </button>
+                                    <button class="btn-secondary" onclick="profileDashboard.changePlan()">
+                                        <i class="fas fa-exchange-alt"></i>
+                                        Change Plan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Actions -->
+                        <div class="settings-card danger">
+                            <div class="card-header">
+                                <h4>
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Account Actions
+                                </h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h5>Export Data</h5>
+                                        <p>Download all your account data</p>
+                                    </div>
+                                    <button class="btn-secondary" onclick="profileDashboard.exportData()">
+                                        <i class="fas fa-download"></i>
+                                        Export
+                                    </button>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h5>Delete Account</h5>
+                                        <p>Permanently delete your account and data</p>
+                                    </div>
+                                    <button class="btn-danger" onclick="profileDashboard.deleteAccount()">
+                                        <i class="fas fa-trash"></i>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-content" id="notificationsTab">
+                    <div class="notifications-settings">
+                        <div class="notification-group">
+                            <h4>
+                                <i class="fas fa-envelope"></i>
+                                Email Notifications
+                            </h4>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Book Updates</h5>
+                                    <p>Notifications about your book submissions and approvals</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Collaboration Invites</h5>
+                                    <p>When someone invites you to collaborate on a book</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Comments & Reviews</h5>
+                                    <p>When someone comments on or reviews your work</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Weekly Summary</h5>
+                                    <p>Weekly digest of your activity and stats</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="notification-group">
+                            <h4>
+                                <i class="fas fa-bell"></i>
+                                Push Notifications
+                            </h4>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Real-time Updates</h5>
+                                    <p>Instant notifications for important updates</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Mentions</h5>
+                                    <p>When someone mentions you in comments or discussions</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Deadlines</h5>
+                                    <p>Reminders for upcoming deadlines and due dates</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="notification-group">
+                            <h4>
+                                <i class="fas fa-mobile-alt"></i>
+                                SMS Notifications
+                            </h4>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Security Alerts</h5>
+                                    <p>Important security notifications via SMS</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <h5>Urgent Updates</h5>
+                                    <p>Critical updates that require immediate attention</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity History Tab -->
+                <div class="tab-content" id="activityTab">
+                    <div class="activity-filters">
+                        <div class="filter-group">
+                            <label for="activityType">Filter by Type:</label>
+                            <select id="activityType">
+                                <option value="all">All Activities</option>
+                                <option value="login">Logins</option>
+                                <option value="submission">Submissions</option>
+                                <option value="collaboration">Collaborations</option>
+                                <option value="settings">Settings Changes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="dateRange">Date Range:</label>
+                            <select id="dateRange">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="365">Last year</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-timeline" id="activityTimeline">
+                        <!-- Activity items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Password Change Modal -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form class="modal-content" id="passwordForm">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+                    <small class="form-help">Password must be at least 8 characters long with uppercase, lowercase, and number</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="profileDashboard.closePasswordModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+     <!-- <script>
+         document.addEventListener("DOMContentLoaded", () => {
+            includeHTML();
+            // Initialize the profile manager
+            window.profileDashboard = new ProfileManager();
+        });
+
+        function includeHTML() {
+            const elements = document.querySelectorAll("[data-include]");
+
+            elements.forEach(el => {
+                const file = el.getAttribute("data-include");
+
+                fetch(file)
+                    .then(response => {
+                        if (!response.ok) throw new Error("File not found: " + file);
+                        return response.text();
+                    })
+                    .then(data => {
+                        el.innerHTML = data;
+                        
+                        // Set active state for the current page
+                        const activeLink = el.querySelector('a[href="profile.html"]');
+                        if (activeLink) {
+                            el.querySelectorAll('.nav-link').forEach(link => {
+                                link.classList.remove('active');
+                            });
+                            activeLink.classList.add('active');
+                        }
+                    })
+                    .catch(err => {
+                        el.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    });
+            });
+        }
+    </script> -->
+    <script src="js/config.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

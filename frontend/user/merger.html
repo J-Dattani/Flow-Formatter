@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Merger - FormatFlow</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <!-- Glassmorphism Background -->
+    <div class="glass-background"></div>
+    
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="landing.html">
+                    <i class="fas fa-file-alt brand-icon"></i>
+                    <span class="brand-text">FormatFlow</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="submitted.html" class="nav-link">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submitted</span>
+                </a>
+                <a href="merger.html" class="nav-link active">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Merger</span>
+                </a>
+                <a href="contact.html" class="nav-link">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <section class="page-header-section">
+                <div class="page-header-content">
+                    <h1 class="page-title">Document Merger</h1>
+                    <p class="page-subtitle">Combine multiple documents into a single comprehensive book</p>
+                </div>
+            </section>
+
+            <!-- Content Area -->
+            <div class="content-area">
+            <!-- Merger Workflow -->
+            <div class="merger-workflow">
+                <div class="workflow-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Upload Documents</h3>
+                        <p>Add your files to merge</p>
+                    </div>
+                </div>
+                
+                <div class="workflow-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <div class="workflow-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Arrange Order</h3>
+                        <p>Organize chapter sequence</p>
+                    </div>
+                </div>
+                
+                <div class="workflow-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <div class="workflow-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Configure Settings</h3>
+                        <p>Set merge preferences</p>
+                    </div>
+                </div>
+                
+                <div class="workflow-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <div class="workflow-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Download Result</h3>
+                        <p>Get your merged book</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="merger-section upload-section" id="uploadSection">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>
+                            <i class="fas fa-upload"></i>
+                            Upload Documents
+                        </h2>
+                        <p>Drag and drop files or click to browse. Supported formats: PDF, DOC, DOCX, TXT</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn-secondary clear-all-btn">
+                            <i class="fas fa-trash"></i>
+                            Clear All
+                        </button>
+                        <button class="btn-primary next-btn" data-step="2">
+                            <i class="fas fa-arrow-right"></i>
+                            Next Step
+                        </button>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drop your documents here</h3>
+                        <p>or click to browse your files</p>
+                        <small>Maximum file size: 10MB per file</small>
+                    </div>
+                    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" hidden>
+                </div>
+
+                <div class="uploaded-files" id="uploadedFiles">
+                    <!-- Uploaded files will appear here -->
+                </div>
+            </div>
+
+            <!-- Arrange Section -->
+            <div class="merger-section arrange-section hidden" id="arrangeSection">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>
+                            <i class="fas fa-sort"></i>
+                            Arrange Document Order
+                        </h2>
+                        <p>Drag and drop to reorder your documents. The order here will determine the chapter sequence in your final book.</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn-secondary back-btn" data-step="1">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button class="btn-primary next-btn" data-step="3">
+                            <i class="fas fa-arrow-right"></i>
+                            Next Step
+                        </button>
+                    </div>
+                </div>
+
+                <div class="arrangement-area">
+                    <div class="arrangement-list" id="arrangementList">
+                        <!-- Documents will be listed here for reordering -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="merger-section settings-section hidden" id="settingsSection">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>
+                            <i class="fas fa-cog"></i>
+                            Merge Settings
+                        </h2>
+                        <p>Configure how your documents should be merged together</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn-secondary back-btn" data-step="2">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button class="btn-primary start-merge-btn">
+                            <i class="fas fa-compress-alt"></i>
+                            Start Merge
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>
+                            <i class="fas fa-file-alt"></i>
+                            Output Settings
+                        </h3>
+                        <div class="form-group">
+                            <label for="outputName">Book Title</label>
+                            <input type="text" id="outputName" placeholder="Enter your book title">
+                        </div>
+                        <div class="form-group">
+                            <label for="outputFormat">Output Format</label>
+                            <select id="outputFormat">
+                                <option value="pdf">PDF Document</option>
+                                <option value="docx">Word Document</option>
+                                <option value="txt">Text File</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>
+                            <i class="fas fa-list"></i>
+                            Table of Contents
+                        </h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeToc" checked>
+                                <span class="checkmark"></span>
+                                Include Table of Contents
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="pageNumbers" checked>
+                                <span class="checkmark"></span>
+                                Add Page Numbers
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="chapterBreaks" checked>
+                                <span class="checkmark"></span>
+                                Page Break Between Chapters
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>
+                            <i class="fas fa-font"></i>
+                            Formatting
+                        </h3>
+                        <div class="form-group">
+                            <label for="fontFamily">Font Family</label>
+                            <select id="fontFamily">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Calibri">Calibri</option>
+                                <option value="Georgia">Georgia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fontSize">Font Size</label>
+                            <select id="fontSize">
+                                <option value="10">10pt</option>
+                                <option value="11">11pt</option>
+                                <option value="12" selected>12pt</option>
+                                <option value="14">14pt</option>
+                                <option value="16">16pt</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>
+                            <i class="fas fa-info-circle"></i>
+                            Book Information
+                        </h3>
+                        <div class="form-group">
+                            <label for="authorName">Author Name</label>
+                            <input type="text" id="authorName" placeholder="Enter author name">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookDescription">Description</label>
+                            <textarea id="bookDescription" rows="3" placeholder="Brief description of your book"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Merge Progress Section -->
+            <div class="merger-section progress-section hidden" id="progressSection">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>
+                            <i class="fas fa-compress-alt"></i>
+                            Merging Documents
+                        </h2>
+                        <p>Please wait while we combine your documents into a single book</p>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-visual">
+                        <div class="progress-circle">
+                            <div class="progress-inner">
+                                <span class="progress-percentage">0%</span>
+                                <small>Merging documents</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-details">
+                        <div class="progress-step" data-step="1">
+                            <i class="fas fa-circle-notch fa-spin step-active"></i>
+                            <span>Validating documents...</span>
+                            <div class="progress-step-status">In progress</div>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                            <i class="fas fa-circle step-pending"></i>
+                            <span>Converting formats...</span>
+                            <div class="progress-step-status">Waiting</div>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                            <i class="fas fa-circle step-pending"></i>
+                            <span>Merging content...</span>
+                            <div class="progress-step-status">Waiting</div>
+                        </div>
+                        <div class="progress-step" data-step="4">
+                            <i class="fas fa-circle step-pending"></i>
+                            <span>Generating table of contents...</span>
+                            <div class="progress-step-status">Waiting</div>
+                        </div>
+                        <div class="progress-step" data-step="5">
+                            <i class="fas fa-circle step-pending"></i>
+                            <span>Finalizing document...</span>
+                            <div class="progress-step-status">Waiting</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Section -->
+            <div class="merger-section download-section hidden" id="downloadSection">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>
+                            <i class="fas fa-download"></i>
+                            Download Complete
+                        </h2>
+                        <p>Your book has been successfully created and is ready for download</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn-secondary start-over-btn">
+                            <i class="fas fa-plus"></i>
+                            Merge Another Book
+                        </button>
+                    </div>
+                </div>
+
+                <div class="download-result">
+                    <div class="result-preview">
+                        <div class="book-cover">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="book-info">
+                            <h3 id="finalBookTitle">Your Merged Book</h3>
+                            <div class="book-stats">
+                                <div class="stat">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span id="totalPages">0 pages</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-list"></i>
+                                    <span id="totalChapters">0 chapters</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-weight"></i>
+                                    <span id="fileSize">0 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="download-actions">
+                        <button class="btn-primary download-btn">
+                            <i class="fas fa-download"></i>
+                            Download Book
+                        </button>
+                        <button class="btn-secondary preview-btn">
+                            <i class="fas fa-eye"></i>
+                            Preview
+                        </button>
+                        <button class="btn-secondary share-btn">
+                            <i class="fas fa-share"></i>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Merges -->
+            <div class="recent-merges" id="recentMerges">
+                <h2>Recent Merges</h2>
+                <div class="merges-grid" id="mergesGrid">
+                    <!-- Example merge item (will be populated dynamically by JS) -->
+                    <div class="merge-item">
+                        <h3 class="merge-title">Research Compilation</h3>
+                        <div class="merge-info">
+                            <span>12 pages</span>
+                            <span>3 chapters</span>
+                            <span>2.5 MB</span>
+                        </div>
+                        <div class="merge-date">
+                            <i class="far fa-calendar-alt"></i>
+                            <span>June 15, 2023</span>
+                        </div>
+                        <div class="merge-actions">
+                            <button class="merge-button">
+                                <i class="fas fa-eye"></i>
+                                View
+                            </button>
+                            <button class="merge-button">
+                                <i class="fas fa-download"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                    <!-- More items will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SortableJS for drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- Custom JS -->
+     <!-- <script>
+         document.addEventListener("DOMContentLoaded", () => {
+            includeHTML();
+        });
+
+        function includeHTML() {
+            const elements = document.querySelectorAll("[data-include]");
+
+            elements.forEach(el => {
+                const file = el.getAttribute("data-include");
+
+                fetch(file)
+                    .then(response => {
+                        if (!response.ok) throw new Error("File not found: " + file);
+                        return response.text();
+                    })
+                    .then(data => {
+                        el.innerHTML = data;
+                    })
+                    .catch(err => {
+                        el.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    });
+            });
+        }
+    </script> -->
+    <script src="js/merger-enhanced.js"></script>
+</body>
+</html>

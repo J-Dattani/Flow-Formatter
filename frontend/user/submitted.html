@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submitted Books - FormatFlow</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <!-- Glassmorphism Background -->
+    <div class="glass-background"></div>
+    
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="landing.html">
+                    <i class="fas fa-file-alt brand-icon"></i>
+                    <span class="brand-text">FormatFlow</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="submitted.html" class="nav-link active">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submitted</span>
+                </a>
+                <a href="merger.html" class="nav-link">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Merger</span>
+                </a>
+                <a href="contact.html" class="nav-link">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <section class="page-header-section">
+                <div class="page-header-content">
+                    <h1 class="page-title">Submitted Books</h1>
+                    <p class="page-subtitle">Track your book submissions and approval status</p>
+                </div>
+            </section>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Submission Stats -->
+                <section class="submissions-stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card stat-card-pending">
+                            <div class="stat-icon pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-number">5</h3>
+                                <p class="stat-label">Pending Review</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-card-approved">
+                            <div class="stat-icon approved">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-number">12</h3>
+                                <p class="stat-label">Approved</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-card-rejected">
+                            <div class="stat-icon rejected">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-number">2</h3>
+                                <p class="stat-label">Needs Revision</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-card-published">
+                            <div class="stat-icon published">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-number">8</h3>
+                                <p class="stat-label">Published</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filter and Search Section -->
+                <section class="filter-section">
+                    <div class="filter-container">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Search submissions...">
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">
+                                <i class="fas fa-th"></i>
+                                All
+                            </button>
+                            <button class="filter-btn" data-filter="pending">
+                                <i class="fas fa-clock"></i>
+                                Pending
+                            </button>
+                            <button class="filter-btn" data-filter="approved">
+                                <i class="fas fa-check-circle"></i>
+                                Approved
+                            </button>
+                            <button class="filter-btn" data-filter="rejected">
+                                <i class="fas fa-times-circle"></i>
+                                Revision
+                            </button>
+                            <button class="filter-btn" data-filter="published">
+                                <i class="fas fa-globe"></i>
+                                Published
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Submissions List -->
+                <section class="submissions-section">
+                    <div class="submissions-header">
+                        <div class="header-left">
+                            <h2>Your Submissions</h2>
+                            <p class="header-subtitle">Manage and track your book submissions</p>
+                        </div>
+                        <button class="btn-primary new-submission-btn">
+                            <i class="fas fa-plus"></i>
+                            New Submission
+                        </button>
+                    </div>
+                    
+                    <div class="submissions-grid" id="submissionsGrid">
+                        <!-- Submissions will be dynamically loaded here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Submission Details Modal -->
+    <div class="modal-overlay" id="submissionModal">
+        <div class="modal-container modal-large">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <h2 id="modalSubmissionTitle">Submission Details</h2>
+                    <span id="modalSubmissionStatus" class="status-badge"></span>
+                </div>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-content">
+                <div class="submission-details">
+                    <!-- Quick Info Cards -->
+                    <div class="detail-cards-grid">
+                        <div class="detail-card">
+                            <div class="detail-card-icon submitted">
+                                <i class="fas fa-calendar-plus"></i>
+                            </div>
+                            <div class="detail-card-content">
+                                <div class="detail-card-label">Submitted Date</div>
+                                <div class="detail-card-value" id="modalSubmittedDate">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-card-icon updated">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="detail-card-content">
+                                <div class="detail-card-label">Last Updated</div>
+                                <div class="detail-card-value" id="modalLastUpdated">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-card-icon reviewer">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="detail-card-content">
+                                <div class="detail-card-label">Reviewer</div>
+                                <div class="detail-card-value" id="modalReviewer">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-card-icon category">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <div class="detail-card-content">
+                                <div class="detail-card-label">Category</div>
+                                <div class="detail-card-value" id="modalCategory">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description Section -->
+                    <div class="detail-section">
+                        <div class="detail-section-header">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>Description</h3>
+                        </div>
+                        <div class="detail-section-body">
+                            <p id="modalDescription" class="modal-description-text"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Review Comments Section -->
+                    <div class="detail-section">
+                        <div class="detail-section-header">
+                            <i class="fas fa-comments"></i>
+                            <h3>Review Comments</h3>
+                        </div>
+                        <div class="detail-section-body">
+                            <div id="modalComments" class="comments-list">
+                                <!-- Comments will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submitted Files Section -->
+                    <div class="detail-section" id="modalFilesSection">
+                        <div class="detail-section-header">
+                            <i class="fas fa-paperclip"></i>
+                            <h3>Submitted Files</h3>
+                        </div>
+                        <div class="detail-section-body">
+                            <div id="modalFiles" class="files-list">
+                                <!-- Files will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="submissionDashboard.downloadSubmission()">
+                    <i class="fas fa-download"></i>
+                    Download
+                </button>
+                <button class="btn-primary" onclick="submissionDashboard.editSubmission()">
+                    <i class="fas fa-edit"></i>
+                    Edit Submission
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Submission Modal -->
+    <div class="modal-overlay" id="newSubmissionModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>New Book Submission</h2>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form class="submission-form" id="newSubmissionForm">
+                <div class="modal-content">
+                    <div class="form-group">
+                        <label for="bookTitle">Book Title</label>
+                        <input type="text" id="bookTitle" name="bookTitle" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bookDescription">Description</label>
+                        <textarea id="bookDescription" name="bookDescription" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookCategory">Category</label>
+                            <select id="bookCategory" name="bookCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="technology">Technology</option>
+                                <option value="science">Science</option>
+                                <option value="business">Business</option>
+                                <option value="education">Education</option>
+                                <option value="fiction">Fiction</option>
+                                <option value="non-fiction">Non-Fiction</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expectedChapters">Expected Chapters</label>
+                            <input type="number" id="expectedChapters" name="expectedChapters" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="collaborators">Collaborators (Optional)</label>
+                        <input type="text" id="collaborators" name="collaborators" placeholder="Enter email addresses separated by commas">
+                        <small class="form-help">Add other authors who will contribute to this book</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="submissionFiles">Upload Files</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag and drop files here or click to browse</p>
+                                <small>Supported formats: PDF, DOC, DOCX, TXT</small>
+                            </div>
+                            <input type="file" id="submissionFiles" name="submissionFiles" multiple accept=".pdf,.doc,.docx,.txt" hidden>
+                        </div>
+                        <div class="uploaded-files" id="uploadedFiles"></div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="submissionDashboard.closeNewSubmissionModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+     <!-- <script>
+         document.addEventListener("DOMContentLoaded", () => {
+            includeHTML();
+        });
+
+        function includeHTML() {
+            const elements = document.querySelectorAll("[data-include]");
+
+            elements.forEach(el => {
+                const file = el.getAttribute("data-include");
+
+                fetch(file)
+                    .then(response => {
+                        if (!response.ok) throw new Error("File not found: " + file);
+                        return response.text();
+                    })
+                    .then(data => {
+                        el.innerHTML = data;
+                    })
+                    .catch(err => {
+                        el.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    });
+            });
+        }
+    </script> -->
+    <script src="js/submitted.js"></script>
+</body>
+</html>

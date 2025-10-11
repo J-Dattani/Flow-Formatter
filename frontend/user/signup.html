@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Smart Document Merger</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="./css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container" id="signupContainer">
+        <!-- Left Column: Background Image -->
+        <div class="signup-image-section" id="imageSection">
+            <div class="signup-image-overlay"></div>
+            <div class="signup-image-content">
+                <h2>Join Our Platform</h2>
+                <p>Create and manage documents efficiently with our powerful tools</p>
+                <div class="signup-features">
+                    <div class="feature-item">
+                        <i class="fas fa-file-contract"></i>
+                        <span>Document Creation</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <span>Team Collaboration</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure Storage</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Signup Form -->
+        <div class="signup-form-section" id="formSection">
+            <div class="signup-form-wrapper">
+                <!-- Logo/Branding -->
+                <div class="signup-header">
+                    <div class="logo-placeholder" style="cursor: pointer;" onclick="window.location.href='login.html'" title="Back to login">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h1>Create Account</h1>
+                    <p>Join the Smart Document Merger platform</p>
+                </div>
+
+                <!-- Signup Form -->
+                <form class="signup-form" id="signup-form">
+                    <!-- Success/Error Messages -->
+                    <div id="signup-success" class="auth-message success-message" style="display: none;"></div>
+                    <div id="signup-error" class="auth-message error-message" style="display: none;"></div>
+                    
+                    <!-- Email Input -->
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input 
+                                type="email" 
+                                class="form-input" 
+                                id="email" 
+                                placeholder="Enter your email address"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input 
+                                type="password" 
+                                class="form-input" 
+                                id="password" 
+                                placeholder="Create a password"
+                                required
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordIcon')">
+                                <i class="fas fa-eye" id="passwordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password Input -->
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input 
+                                type="password" 
+                                class="form-input" 
+                                id="confirm-password" 
+                                placeholder="Confirm your password"
+                                required
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirm-password', 'confirmPasswordIcon')">
+                                <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sign Up Button -->
+                    <button type="submit" class="btn-primary-signup" id="signupBtn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Sign Up</span>
+                        <div class="btn-loader" id="btnLoader">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <!-- Social Signup Buttons -->
+                    <div class="social-buttons">
+                        <button type="button" class="btn-social" onclick="signUpWithGoogle()">
+                            <svg width="20" height="20" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+                        <button type="button" class="btn-social" onclick="signUpWithApple()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                            </svg>
+                            Continue with Apple
+                        </button>
+                    </div>
+
+                    <!-- Sign In Link -->
+                    <div class="signup-footer">
+                        <p>Already have an account? <a href="login.html" class="signin-link">Sign In</a></p>
+                    </div>
+                </form>
+
+                <!-- Success Message (Hidden) -->
+                <div class="success-message" id="successMessage">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Welcome to Our Community!</h3>
+                    <p>Your account has been created successfully.</p>
+                    <button class="btn-continue" onclick="redirectToLogin()">Continue to Sign In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Password Toggle Functionality
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const passwordIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Form Submission with Auth System
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorDiv = document.getElementById('signup-error');
+            const successDiv = document.getElementById('signup-success');
+
+            // Clear previous messages
+            if (errorDiv) errorDiv.style.display = 'none';
+            if (successDiv) successDiv.style.display = 'none';
+
+            // The auth system will handle validation and signup
+            // This is handled by auth.js form handlers
+        });
+
+        // Signup Animation
+        function startSignupAnimation() {
+            const container = document.getElementById('signupContainer');
+            const imageSection = document.getElementById('imageSection');
+            const formSection = document.getElementById('formSection');
+            const signupBtn = document.getElementById('signupBtn');
+            const btnLoader = document.getElementById('btnLoader');
+            const successMessage = document.getElementById('successMessage');
+            const signupForm = document.getElementById('signupForm');
+            
+            // Show button loading
+            signupBtn.disabled = true;
+            btnLoader.style.display = 'block';
+            
+            // Add animation classes
+            container.classList.add('signup-animating');
+            imageSection.classList.add('slide-left');
+            formSection.classList.add('slide-in-right');
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                // Hide form and show success message
+                signupForm.style.opacity = '0';
+                signupForm.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    signupForm.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    successMessage.classList.add('fade-in');
+                }, 300);
+            }, 2000);
+        }
+
+        // Social Signup Functions
+        function signUpWithGoogle() {
+            console.log('Google Sign-Up clicked');
+            alert('Google Sign-Up will be implemented with OAuth integration');
+        }
+
+        function signUpWithApple() {
+            console.log('Apple Sign-Up clicked');
+            alert('Apple Sign-Up will be implemented with OAuth integration');
+        }
+
+        // Utility Functions
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function showError(message) {
+            alert(message); // Replace with better error handling
+        }
+
+        function redirectToLogin() {
+            window.location.href = 'login.html';
+        }
+
+        // Form Input Focus Effects
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+
+        // Real-time password confirmation validation
+        document.getElementById('confirm-password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#e5e7eb';
+            }
+        });
+    </script>
+
+    <!-- Authentication System -->
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <style>
+        /* Auth message styles */
+        .auth-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</body>
+</html>

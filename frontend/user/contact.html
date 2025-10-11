@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Support - FormatFlow</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <!-- Glassmorphism Background -->
+    <div class="glass-background"></div>
+    
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="landing.html">
+                    <i class="fas fa-file-alt brand-icon"></i>
+                    <span class="brand-text">FormatFlow</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link ">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="submitted.html" class="nav-link">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submitted</span>
+                </a>
+                <a href="merger.html" class="nav-link">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Merger</span>
+                </a>
+                <a href="contact.html" class="nav-link active">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <section class="page-header-section">
+                <div class="page-header-content">
+                    <h1 class="page-title">Contact Support</h1>
+                    <p class="page-subtitle">Get help with your account, books, or special formatting requests</p>
+                </div>
+            </section>
+
+            <!-- Content Area -->
+            <div class="content-area">
+            <!-- Support Options -->
+            <div class="support-options">
+                <div class="support-card quick-help">
+                    <div class="support-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3>Quick Help</h3>
+                    <p>Find answers to common questions in our help center</p>
+                    <a href="#" class="btn-secondary">
+                        <i class="fas fa-search"></i>
+                        Browse Help Center
+                    </a>
+                </div>
+                
+                <div class="support-card live-chat">
+                    <div class="support-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Live Chat</h3>
+                    <p>Chat with our support team for immediate assistance</p>
+                    <button class="btn-primary" onclick="contactDashboard.startLiveChat()">
+                        <i class="fas fa-comment-dots"></i>
+                        Start Chat
+                    </button>
+                </div>
+                
+                <div class="support-card email-support">
+                    <div class="support-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email Support</h3>
+                    <p>Send us a detailed message and we'll get back to you soon</p>
+                    <button class="btn-secondary" onclick="contactDashboard.scrollToEmailForm()">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Email
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contact Forms Section -->
+            <div class="contact-forms">
+                <!-- General Support Form -->
+                <div class="form-section">
+                    <div class="form-header">
+                        <h2>
+                            <i class="fas fa-life-ring"></i>
+                            General Support
+                        </h2>
+                        <p>Need help with your account, books, or have general questions? We're here to help!</p>
+                    </div>
+                    
+                    <form class="contact-form" id="generalSupportForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="supportCategory">Category</label>
+                                <select id="supportCategory" name="category" required>
+                                    <option value="">Select a category</option>
+                                    <option value="account">Account Issues</option>
+                                    <option value="technical">Technical Problems</option>
+                                    <option value="billing">Billing & Payments</option>
+                                    <option value="feature">Feature Request</option>
+                                    <option value="bug">Bug Report</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority">Priority</label>
+                                <select id="priority" name="priority" required>
+                                    <option value="">Select priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" placeholder="Brief description of your issue" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="6" placeholder="Please provide detailed information about your issue or question..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="attachments">Attachments (Optional)</label>
+                            <div class="file-upload-area" id="generalFileUpload">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-paperclip"></i>
+                                    <p>Drag and drop files here or click to browse</p>
+                                    <small>Max file size: 10MB. Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG</small>
+                                </div>
+                                <input type="file" id="generalAttachments" name="attachments" multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" hidden>
+                            </div>
+                            <div class="uploaded-files" id="generalUploadedFiles"></div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Special Formatting Request Form -->
+                <div class="form-section special-formatting">
+                    <div class="form-header">
+                        <h2>
+                            <i class="fas fa-magic"></i>
+                            Special Book Formatting Request
+                        </h2>
+                        <p>Need custom formatting for your book? Our experts can help with advanced layouts, special designs, and professional formatting.</p>
+                        
+                        <div class="pricing-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Custom formatting services start at $49. We'll provide a detailed quote based on your requirements.</span>
+                        </div>
+                    </div>
+                    
+                    <form class="contact-form" id="formattingRequestForm">
+                        <div class="form-group">
+                            <label for="bookTitle">Book Title</label>
+                            <input type="text" id="bookTitle" name="bookTitle" placeholder="Enter your book title" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookType">Book Type</label>
+                                <select id="bookType" name="bookType" required>
+                                    <option value="">Select book type</option>
+                                    <option value="novel">Novel/Fiction</option>
+                                    <option value="non-fiction">Non-Fiction</option>
+                                    <option value="academic">Academic/Research</option>
+                                    <option value="textbook">Textbook</option>
+                                    <option value="children">Children's Book</option>
+                                    <option value="poetry">Poetry</option>
+                                    <option value="cookbook">Cookbook</option>
+                                    <option value="manual">Manual/Guide</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pageCount">Estimated Page Count</label>
+                                <input type="number" id="pageCount" name="pageCount" placeholder="e.g., 250" min="1">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="formattingNeeds">Formatting Requirements</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="table-of-contents">
+                                    <span class="checkmark"></span>
+                                    Professional Table of Contents
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="headers-footers">
+                                    <span class="checkmark"></span>
+                                    Custom Headers & Footers
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="chapter-styling">
+                                    <span class="checkmark"></span>
+                                    Chapter Title Styling
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="image-placement">
+                                    <span class="checkmark"></span>
+                                    Image/Figure Placement
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="typography">
+                                    <span class="checkmark"></span>
+                                    Advanced Typography
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="print-ready">
+                                    <span class="checkmark"></span>
+                                    Print-Ready Formatting
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="formatting" value="ebook-format">
+                                    <span class="checkmark"></span>
+                                    E-book Formatting
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="specialRequirements">Special Requirements</label>
+                            <textarea id="specialRequirements" name="specialRequirements" rows="4" placeholder="Describe any specific formatting needs, style preferences, or special requirements..."></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="budget">Budget Range</label>
+                                <select id="budget" name="budget">
+                                    <option value="">Select budget range</option>
+                                    <option value="49-99">$49 - $99</option>
+                                    <option value="100-199">$100 - $199</option>
+                                    <option value="200-499">$200 - $499</option>
+                                    <option value="500-999">$500 - $999</option>
+                                    <option value="1000+">$1000+</option>
+                                    <option value="discuss">Let's discuss</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="deadline">Preferred Deadline</label>
+                                <input type="date" id="deadline" name="deadline" min="">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bookFiles">Book Files</label>
+                            <div class="file-upload-area" id="bookFileUpload">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-upload"></i>
+                                    <p>Upload your book files for review</p>
+                                    <small>Accepted formats: PDF, DOC, DOCX, TXT. Max size: 50MB per file</small>
+                                </div>
+                                <input type="file" id="bookFiles" name="bookFiles" multiple accept=".pdf,.doc,.docx,.txt" hidden>
+                            </div>
+                            <div class="uploaded-files" id="bookUploadedFiles"></div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-magic"></i>
+                                Request Quote
+                            </button>
+                            <p class="form-note">We'll review your requirements and send you a detailed quote within 24 hours.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="faq-section">
+                <h2>
+                    <i class="fas fa-question-circle"></i>
+                    Frequently Asked Questions
+                </h2>
+                
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="contactDashboard.toggleFAQ(this)">
+                            <h4>How long does book formatting take?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Standard formatting typically takes 3-7 business days depending on complexity and length. Rush services are available for an additional fee.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="contactDashboard.toggleFAQ(this)">
+                            <h4>What file formats do you accept?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>We accept PDF, DOC, DOCX, TXT, and RTF files. For best results, we recommend submitting your manuscript in DOC or DOCX format.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="contactDashboard.toggleFAQ(this)">
+                            <h4>Can you format books for both print and digital?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes! We provide formatting optimized for print (PDF), Kindle (MOBI), and EPUB formats. Each format is specially optimized for its platform.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="contactDashboard.toggleFAQ(this)">
+                            <h4>Do you offer revisions?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes, we include up to 2 rounds of revisions with every formatting package. Additional revisions can be purchased separately.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="contactDashboard.toggleFAQ(this)">
+                            <h4>What's included in professional formatting?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Professional formatting includes: custom chapter headers, table of contents, page numbering, proper margins, font selection, paragraph spacing, and print-ready PDF generation.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="contactDashboard.toggleFAQ(this)">
+                            <h4>How do I submit payment?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>We accept all major credit cards, PayPal, and bank transfers. Payment is typically required 50% upfront and 50% upon completion.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="contact-info-section">
+                <h2>Other Ways to Reach Us</h2>
+                
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="method-info">
+                            <h4>Email</h4>
+                            <p>support@formatflow.com</p>
+                            <small>Response within 24 hours</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="method-info">
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567</p>
+                            <small>Mon-Fri, 9 AM - 6 PM EST</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="method-info">
+                            <h4>Live Chat</h4>
+                            <p>Available on website</p>
+                            <small>Mon-Fri, 9 AM - 8 PM EST</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+     <!-- <script>
+         document.addEventListener("DOMContentLoaded", () => {
+            includeHTML();
+        });
+
+        function includeHTML() {
+            const elements = document.querySelectorAll("[data-include]");
+
+            elements.forEach(el => {
+                const file = el.getAttribute("data-include");
+
+                fetch(file)
+                    .then(response => {
+                        if (!response.ok) throw new Error("File not found: " + file);
+                        return response.text();
+                    })
+                    .then(data => {
+                        el.innerHTML = data;
+                    })
+                    .catch(err => {
+                        el.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    });
+            });
+        }
+    </script> -->
+    <script src="js/contact.js"></script>
+</body>
+</html>

@@ -76,63 +76,47 @@ function initializeProjectsPage() {
  */
 async function loadProjects() {
     try {
-        // If Supabase client is available, fetch live projects. Otherwise show empty list.
+        // Backend-first: fetch all templates and render them as projects
         let projects = [];
-        if (window.__supabaseClient || window.supabaseClient) {
+        try {
+            const res = await TemplateAPI.getAll();
+            if (res && res.success && Array.isArray(res.data)) {
+                projects = res.data.map(t => ({
+                    id: t.id,
+                    name: t.name || 'Untitled',
+                    description: t.description || (t.metadata && (t.metadata.description || t.metadata.summary)) || '',
+                    template: t.name || '',
+                    authors: [],
+                    progress: 0,
+                    status: (t.metadata && t.metadata.status) || 'active',
+                    dueDate: null,
+                    createdAt: t.updated_at || t.created_at || null
+                }));
+            }
+        } catch (e) {
+            console.warn('TemplateAPI.getAll failed, falling back to Supabase client if available', e);
+        }
+
+        // Supabase fallback if backend path returned nothing
+        if ((!projects || projects.length === 0) && (window.__supabaseClient || window.supabaseClient)) {
             try {
                 const supa = window.__supabaseClient || window.supabaseClient;
-                console.debug('Supabase client object:', supa);
-                // Use templates as projects: map templates -> project-like rows
-                const firstQuery = await supa.from('templates').select('id,name,description,category,metadata,updated_at').order('updated_at', { ascending: false });
-                const data = firstQuery.data;
-                const error = firstQuery.error;
-                console.debug('Templates first query result:', { data, error, status: firstQuery.status });
-                // If the query returned no rows, try a broader select('*') in case columns differ or RLS acts differently
-                if (!error && Array.isArray(data) && data.length === 0) {
-                    console.info('Initial templates query returned 0 rows, trying fallback select(*) to gather more debug info');
-                    const fallback = await supa.from('templates').select('*').limit(20);
-                    console.debug('Templates fallback query result:', { data: fallback.data, error: fallback.error, status: fallback.status });
-                    // If fallback returned rows, use them
-                    if (!fallback.error && Array.isArray(fallback.data) && fallback.data.length > 0) {
-                        projects = fallback.data.map(t => ({
-                            id: t.id,
-                            name: t.name,
-                            description: t.description || (t.metadata && t.metadata.description) || '',
-                            template: t.name || '',
-                            authors: [],
-                            progress: 0,
-                            status: (t.metadata && t.metadata.status) || 'active',
-                            dueDate: null,
-                            createdAt: t.updated_at || t.created_at || null
-                        }));
-                    }
-                }
-                if (!error && Array.isArray(data) && data.length > 0) {
-                    projects = data.map(t => ({
+                const q = await supa.from('templates').select('*').order('updated_at', { ascending: false }).limit(50);
+                if (!q.error && Array.isArray(q.data)) {
+                    projects = q.data.map(t => ({
                         id: t.id,
-                        name: t.name,
-                        description: t.description || (t.metadata && t.metadata.description) || '',
+                        name: t.name || 'Untitled',
+                        description: t.description || (t.metadata && (t.metadata.description || t.metadata.summary)) || '',
                         template: t.name || '',
-                        authors: [], // templates do not include authors in this schema
+                        authors: [],
                         progress: 0,
                         status: (t.metadata && t.metadata.status) || 'active',
                         dueDate: null,
-                        createdAt: t.updated_at || null
+                        createdAt: t.updated_at || t.created_at || null
                     }));
-                } else {
-                    // If there is an error, surface it clearly; otherwise, warn that data is empty
-                    if (error) {
-                        console.warn('Supabase templates fetch error', error);
-                        // Common cause: RLS/policies blocking anon access. Add a helpful hint.
-                        if (error.message && /permission|policy|forbidden|not authorized|authentication/i.test(error.message)) {
-                            console.warn('Permission error detected. If your Supabase project has Row Level Security (RLS) enabled, ensure the anon role or the current user has a SELECT policy for the `templates` table.');
-                        }
-                    } else {
-                        console.warn('Supabase templates fetch returned no rows (empty array)');
-                    }
                 }
             } catch (fetchErr) {
-                console.warn('Error fetching templates as projects:', fetchErr);
+                console.warn('Supabase fallback fetch failed:', fetchErr);
             }
         }
 

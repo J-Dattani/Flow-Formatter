@@ -1,0 +1,20 @@
+﻿{
+    "page":  1,
+    "blocks":  [
+                   {
+                       "lines":  [
+                                     {
+                                         "spans":  [
+                                                       {
+                                                           "size":  24,
+                                                           "bbox":  "50 150 400 180",
+                                                           "flags":  16,
+                                                           "text":  "I. Introduction:"
+                                                       }
+                                                   ]
+                                     }
+                                 ],
+                       "type":  "text"
+                   }
+               ]
+}

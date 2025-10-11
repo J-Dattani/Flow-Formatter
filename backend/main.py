@@ -18,10 +18,17 @@ async def health():
 	return {"status": "ok"}
 
 
-# Optional: mount routers here when implemented
-# from .api import auth_routes, authors_routes, dashboard_routes, document_routes
-# app.include_router(auth_routes.router, prefix="/api/auth")
-# ...
+# Routers
+from .api import auth_routes
+from .api import document_merger_routes
+from .api import template_routes
+from .api import dashboard_routes
+from .api import authors_routes
+app.include_router(auth_routes.router, prefix="/api")
+app.include_router(document_merger_routes.router, prefix="/api")
+app.include_router(template_routes.router, prefix="/api")
+app.include_router(dashboard_routes.router, prefix="/api")
+app.include_router(authors_routes.router, prefix="/api")
 
 
 if __name__ == "__main__":
