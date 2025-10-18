@@ -181,7 +181,7 @@
 (function initSupabase() {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') return;
   var url = 'https://pvrqhnmwbckyrzwxhftk.supabase.co';
-  var key = 'YOUR_ANON_KEY_HERE'; // use the anon key
+  var key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2cnFobm13YmNreXJ6d3hoZnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MDYyMjQsImV4cCI6MjA3NTQ4MjIyNH0.usngzASPOkOKV9k6omPxCAy_inCi2fT7Gtp5pZiMfA4'; // use the anon key
   window.supabaseClient = window.supabase.createClient(url, key, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
