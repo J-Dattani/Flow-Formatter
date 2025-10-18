@@ -172,27 +172,23 @@
             });
         });
     </script>
-<!-- Inline Supabase Client -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
+
+<!-- Inline client -->
 <script>
 (function initSupabase() {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') return;
-  function readConfig() {
-    var url = 'https://pvrqhnmwbckyrzwxhftk.supabase.co';
-    var key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2cnFobm13YmNreXJ6d3hoZnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MDYyMjQsImV4cCI6MjA3NTQ4MjIyNH0.usngzASPOkOKV9k6omPxCAy_inCi2fT7Gtp5pZiMfA4';
-    return { url, key };
-  }
-  window.supabaseClient = window.supabase.createClient(
-    readConfig().url,
-    readConfig().key,
-    {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    }
-  );
+  var url = 'https://pvrqhnmwbckyrzwxhftk.supabase.co';
+  var key = 'YOUR_ANON_KEY_HERE'; // use the anon key
+  window.supabaseClient = window.supabase.createClient(url, key, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
 })();
 </script>
 
-    <!-- Supabase Client Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
+<!--  -->
 
     <!-- Keep existing Authentication System -->
     <script src="../js/config.js"></script>
