@@ -30,13 +30,20 @@
   function createClient() {
     var cfg = readConfig();
     try {
-      window.__supabaseClient = window.supabase.createClient(cfg.url, cfg.key, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
-      });
+   window.__supabaseClient = window.supabase.createClient(cfg.url, cfg.key, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: "pkce", // helps with Netlify hosted apps
+  },
+  global: {
+    headers: {
+      "x-client-info": "flow-formatter",
+    },
+  },
+});
+
       window.supabaseClient = window.__supabaseClient; // back-compat alias
       return true;
     } catch (err) {
